@@ -18,9 +18,17 @@ const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 630;
 const BACKGROUND = '#EDE9DD'; // --bone
 
-const SIDE_MARGIN = 56;
-const GAP = 16;
-const BOTTOM_MARGIN = 64;
+// NOTE on scale: the eight portraits are narrow full-body figures (aspect
+// ratios ~0.33-0.61, summing to ~3.67). Packed edge-to-edge in a single row
+// with zero margins and zero gaps, the tallest achievable common height is
+// CANVAS_WIDTH / aspectSum =~ 326px (~52% of 630px) -- nowhere near the
+// 70-75% (440-470px) that would look right for a single portrait alone.
+// Eight-across is a hard width constraint, not a tuning knob: any margin or
+// gap we keep only lowers that ceiling further. SIDE_MARGIN/GAP below are
+// chosen as the smallest values that still read as deliberate framing
+// (rather than edge-to-edge clipping), maximizing height within that limit.
+const SIDE_MARGIN = 32;
+const GAP = 10;
 
 // Read each portrait's natural size so we can solve for a common height that
 // makes the whole row (8 portraits + 7 gaps + 2 side margins) fit exactly
@@ -52,15 +60,17 @@ for (const p of portraits) {
 }
 rowWidth += gapsTotal;
 
-// Center the row horizontally (absorbs any rounding slack) and bottom-align
-// every portrait on a shared baseline near the bottom of the card.
+// Center the row horizontally (absorbs any rounding slack). Every portrait
+// was resized to the same targetHeight, so they already share a bottom
+// baseline within the row; center that whole block vertically so the bone
+// margin above and below the figures is equal.
 const startX = Math.round((CANVAS_WIDTH - rowWidth) / 2);
-const baselineY = CANVAS_HEIGHT - BOTTOM_MARGIN;
+const rowTop = Math.round((CANVAS_HEIGHT - targetHeight) / 2);
 
 const composites = [];
 let x = startX;
 for (const r of resized) {
-  composites.push({ input: r.buffer, left: x, top: baselineY - r.height });
+  composites.push({ input: r.buffer, left: x, top: rowTop });
   x += r.width + GAP;
 }
 
@@ -79,5 +89,5 @@ await sharp({
   .toFile('public/og-default.png');
 
 console.log(
-  `wrote public/og-default.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), portrait height ${targetHeight}px, row width ${rowWidth}px, startX ${startX}`,
+  `wrote public/og-default.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), portrait height ${targetHeight}px, row width ${rowWidth}px, startX ${startX}, rowTop ${rowTop}`,
 );

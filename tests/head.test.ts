@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 
 describe('index head', () => {
   const html = () => readFileSync('dist/index.html', 'utf8');
@@ -18,5 +18,11 @@ describe('index head', () => {
   });
   it('has a skip link', () => {
     expect(html()).toContain('href="#main"');
+  });
+});
+
+describe('og image', () => {
+  it('builds a default OG image asset', () => {
+    expect(existsSync('dist/og-default.png')).toBe(true);
   });
 });

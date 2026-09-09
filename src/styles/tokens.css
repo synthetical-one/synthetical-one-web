@@ -3,6 +3,7 @@
   --bone-sunk: #E3DECE;
   --ink: #14161B;
   --ink-soft: #5A6070;
+  --focus-ring: var(--ink);
 
   --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;

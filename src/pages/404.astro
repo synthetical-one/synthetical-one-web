@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+---
+<Base title="Not found — Synthetical" description="That page does not exist.">
+  <section class="nf">
+    <p class="cat">ERROR — 404</p>
+    <h1>Nothing here.</h1>
+    <p class="b">The page you asked for does not exist. The eight, however, do.</p>
+    <a href="/">Back to the universe →</a>
+  </section>
+  <SiteFooter />
+</Base>
+
+<style>
+  .nf { padding: clamp(60px, 12vw, 160px) var(--gutter); }
+  .cat { font-family: var(--font-mono); font-size: 12px; letter-spacing: .24em; color: var(--ink-soft); margin: 0 0 20px; }
+  h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(48px, 10vw, 120px); line-height: .88; letter-spacing: -.035em; text-transform: uppercase; margin: 0; }
+  .b { margin: 22px 0 26px; color: var(--ink-soft); font-size: 18px; }
+  a { font-family: var(--font-mono); font-size: 13px; letter-spacing: .14em; color: var(--ink); }
+</style>

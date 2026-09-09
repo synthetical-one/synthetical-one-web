@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://synthetical.one/sitemap-index.xml

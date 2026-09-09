@@ -1,0 +1,16 @@
+:root {
+  --bone: #EDE9DD;
+  --bone-sunk: #E3DECE;
+  --ink: #14161B;
+  --ink-soft: #5A6070;
+
+  --font-display: 'Space Grotesk Variable', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-body: 'IBM Plex Sans Variable', system-ui, sans-serif;
+
+  --measure: 60ch;
+  --gutter: clamp(20px, 4vw, 48px);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bone); color: var(--ink); font-family: var(--font-body); }

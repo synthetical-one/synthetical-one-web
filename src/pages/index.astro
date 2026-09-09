@@ -1,6 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Premise from '../components/Premise.astro';
 import CharacterBand from '../components/CharacterBand.astro';
+import WhatWeMake from '../components/WhatWeMake.astro';
+import Studio from '../components/Studio.astro';
+import SiteFooter from '../components/SiteFooter.astro';
 import { TAGLINE } from '../lib/site';
 import { getCollection } from 'astro:content';
 
@@ -9,6 +14,10 @@ const characters = (await getCollection('characters')).sort(
 );
 ---
 <Base title="Synthetical — an AI-native media studio" description={TAGLINE}>
-  <h1>Synthetical</h1>
+  <Hero />
+  <Premise />
   {characters.map((entry) => <CharacterBand entry={entry} />)}
+  <WhatWeMake />
+  <Studio />
+  <SiteFooter />
 </Base>

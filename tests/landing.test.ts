@@ -1,0 +1,25 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+
+describe('landing page', () => {
+  const html = () => readFileSync('dist/index.html', 'utf8');
+
+  it('links to the YouTube channel', () => {
+    expect(html()).toContain('https://www.youtube.com/@synthetical-media');
+  });
+  it('carries the canonical tagline', () => {
+    expect(html()).toContain('Different questions. Different perspectives.');
+  });
+  it('names all four formats', () => {
+    const page = html();
+    for (const f of ['Short-form', 'Panels', 'Interviews', 'Documentaries']) {
+      expect(page).toContain(f);
+    }
+  });
+  it('offers a contact route for partners', () => {
+    expect(html()).toContain('mailto:');
+  });
+  it('has exactly one h1', () => {
+    expect(html().match(/<h1[\s>]/g)).toHaveLength(1);
+  });
+});

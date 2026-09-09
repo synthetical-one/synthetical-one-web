@@ -1,0 +1,20 @@
+---
+import { CONTACT_EMAIL } from '../lib/site';
+---
+<section class="studio">
+  <h2>The studio</h2>
+  <p>
+    Synthetical is an AI-native media company. The production unit is a research
+    project, not a video: research is gathered and cited, verified and graded, cast to
+    the characters best suited to it, then written and performed.
+  </p>
+  <p>Humans keep approval over topic selection, sensitive claims and publication.</p>
+  <a class="contact" href={`mailto:${CONTACT_EMAIL}`}>Partner with us →</a>
+</section>
+
+<style>
+  .studio { padding: clamp(40px, 7vw, 96px) var(--gutter); border-top: 1px solid rgba(20,22,27,.18); }
+  h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(28px, 4.4vw, 54px); margin: 0 0 24px; letter-spacing: -.025em; }
+  p { margin: 0 0 16px; max-width: var(--measure); line-height: 1.6; color: var(--ink-soft); }
+  .contact { display: inline-block; margin-top: 18px; font-family: var(--font-mono); font-size: 13px; letter-spacing: .14em; color: var(--ink); }
+</style>

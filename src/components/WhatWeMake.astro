@@ -1,0 +1,27 @@
+---
+const formats = [
+  { name: 'Short-form', body: 'One character, one subject, told directly to camera.' },
+  { name: 'Panels', body: 'Several characters on one topic, disagreeing productively.' },
+  { name: 'Interviews', body: 'Character to character, and character to human guest.' },
+  { name: 'Documentaries', body: 'Long-form work built on a verified research project.' },
+];
+---
+<section class="make">
+  <h2>What we make</h2>
+  <ul>
+    {formats.map((f) => (
+      <li>
+        <p class="n">{f.name}</p>
+        <p class="b">{f.body}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .make { padding: clamp(40px, 7vw, 96px) var(--gutter); border-top: 1px solid rgba(20,22,27,.18); }
+  h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(28px, 4.4vw, 54px); margin: 0 0 36px; letter-spacing: -.025em; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .n { font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; margin: 0 0 10px; }
+  .b { margin: 0; color: var(--ink-soft); line-height: 1.55; }
+</style>

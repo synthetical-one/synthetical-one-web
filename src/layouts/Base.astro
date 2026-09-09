@@ -1,0 +1,42 @@
+---
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import { SITE_NAME, SITE_URL } from '../lib/site';
+
+interface Props { title: string; description: string; ogImage?: string }
+const { title, description, ogImage } = Astro.props;
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+const image = new URL(ogImage ?? '/og-default.png', SITE_URL).href;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <main id="main"><slot /></main>
+    <style>
+      .skip {
+        position: absolute; left: -9999px;
+        background: var(--ink); color: var(--bone);
+        padding: 12px 18px; font-family: var(--font-mono); font-size: 13px;
+      }
+      .skip:focus { left: 12px; top: 12px; z-index: 99; }
+      :global(a:focus-visible), :global(button:focus-visible) {
+        outline: 3px solid var(--ink); outline-offset: 3px;
+      }
+    </style>
+  </body>
+</html>

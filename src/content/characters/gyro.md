@@ -10,7 +10,7 @@ aesthetic: "Art Deco"
 home: "The Observatory Library"
 accessory: "Art Deco mechanical pocket watch"
 companion: "Mechanical cat"
-scale: "122 cm with fedora"
+scale: "122 cm with fedora / 107 cm body"
 tagline: "Perspective keeps us human."
 portrait: "../../assets/characters/gyro.png"
 order: 1

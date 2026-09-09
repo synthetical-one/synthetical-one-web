@@ -8,6 +8,8 @@ colourName: "Deep Ocean Blue"
 colourHex: "#0369A1"
 aesthetic: "Nautical"
 home: "Expedition Vessel"
+accessory: "Compass"
+companion: "Mechanical albatross"
 tagline: "A wider world makes a kinder one."
 portrait: "../../assets/characters/roam.png"
 order: 6

@@ -42,6 +42,14 @@ describe('character content', () => {
     expect(readFileSync(`${DIR}/${slug}.md`, 'utf8')).not.toMatch(/MBTI/i);
   });
 
+  it.each(Object.keys(CHARACTER_COLOURS))('%s withholds canon_status', (slug) => {
+    expect(readFileSync(`${DIR}/${slug}.md`, 'utf8')).not.toMatch(/canon_status/i);
+  });
+
+  it.each(Object.keys(CHARACTER_COLOURS))('%s withholds age_equivalent', (slug) => {
+    expect(readFileSync(`${DIR}/${slug}.md`, 'utf8')).not.toMatch(/age_equivalent/i);
+  });
+
   it('orders are 1..8 with no duplicates', () => {
     const orders = Object.keys(CHARACTER_COLOURS).map((s) => Number(frontmatter(s).order));
     expect([...new Set(orders)].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);

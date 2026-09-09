@@ -8,6 +8,8 @@ colourName: "Opal / Iridescent"
 colourHex: "#7C5FBF"
 aesthetic: "Art Nouveau"
 home: "Glass Garden"
+accessory: "Crystal"
+companion: "Lumi — mechanical hummingbird"
 tagline: "If you learn to see the beauty in something, you become less willing to destroy it."
 portrait: "../../assets/characters/prism.png"
 order: 7

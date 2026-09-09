@@ -8,6 +8,8 @@ colourName: "Coral"
 colourHex: "#C2410C"
 aesthetic: "Mid-century Modern"
 home: "Echo Studio"
+accessory: "Headphones"
+companion: "Scarlet — mechanical macaw"
 tagline: "Great conversations bring people closer."
 portrait: "../../assets/characters/echo.png"
 order: 5

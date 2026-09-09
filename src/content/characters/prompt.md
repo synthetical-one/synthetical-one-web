@@ -8,6 +8,8 @@ colourName: "Neon Purple"
 colourHex: "#6D28D9"
 aesthetic: "Cyberpunk"
 home: "Rooftop / Underground Labs"
+accessory: "Earpiece"
+companion: "Byte — mechanical gecko"
 tagline: "Good ideas should be dangerous."
 portrait: "../../assets/characters/prompt.png"
 order: 8

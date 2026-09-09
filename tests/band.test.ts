@@ -1,8 +1,24 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 
+/**
+ * Decode the small set of HTML entities Astro's default `{expr}` escaping
+ * can introduce into rendered text, so assertions can compare against the
+ * plain-text content a reader would actually see rather than its escaped
+ * HTML form.
+ */
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+}
+
 describe('character bands on the landing page', () => {
-  const html = () => readFileSync('dist/index.html', 'utf8');
+  const html = () => decodeEntities(readFileSync('dist/index.html', 'utf8'));
 
   it('renders all eight catalogue numbers', () => {
     const page = html();

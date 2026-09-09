@@ -16,7 +16,7 @@ const Heading = headingLevel;
   <div class="mount">
     <Image
       src={d.portrait}
-      alt={`${d.name}, the ${d.archetype} — front view of the character`}
+      alt={`${d.name}, the ${d.archetype} — character reference portrait`}
       height={400}
       densities={[1, 2]}
     />
@@ -26,7 +26,7 @@ const Heading = headingLevel;
   <div class="copy">
     <p class="cat chip">{d.catalogue} — {d.archetype.toUpperCase()}</p>
     <Heading class="name">{d.name}</Heading>
-    <p class="q" set:html={`“${d.coreQuestion}”`} />
+    <p class="q">“{d.coreQuestion}”</p>
     <dl class="spec">
       <div><dt>AESTHETIC</dt><dd>{d.aesthetic}</dd></div>
       <div><dt>COLOUR</dt><dd>{d.colourName}</dd></div>

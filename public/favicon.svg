@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" width="88" height="88" role="img" aria-label="Synthetical favicon">
+  <title>Synthetical favicon</title>
+  <desc>App icon: mark on ink ground, cells enlarged and gaps widened for legibility below 24px.</desc>
+  <rect width="88" height="88" rx="18" fill="#14161B"/>
+  <g fill="#F6F7F8">
+    <rect x="16" y="16" width="17" height="17" rx="2"/>
+    <rect x="35.5" y="16" width="17" height="17" rx="2"/>
+    <rect x="55" y="16" width="17" height="17" rx="2"/>
+    <rect x="16" y="35.5" width="17" height="17" rx="2"/>
+    <rect x="55" y="35.5" width="17" height="17" rx="2"/>
+    <rect x="16" y="55" width="17" height="17" rx="2"/>
+    <rect x="35.5" y="55" width="17" height="17" rx="2"/>
+  </g>
+  <rect x="55" y="55" width="17" height="17" rx="2" fill="#3FE08A"/>
+</svg>

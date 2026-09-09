@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" width="88" height="88" role="img" aria-label="Synthetical mark, one colour">
+  <title>Synthetical mark — one colour</title>
+  <desc>Single-colour version for print, embroidery and stamping. Uses currentColor.</desc>
+  <g fill="currentColor">
+    <rect x="8"  y="8"  width="20" height="20" rx="2"/>
+    <rect x="34" y="8"  width="20" height="20" rx="2"/>
+    <rect x="60" y="8"  width="20" height="20" rx="2"/>
+    <rect x="8"  y="34" width="20" height="20" rx="2"/>
+    <rect x="60" y="34" width="20" height="20" rx="2"/>
+    <rect x="8"  y="60" width="20" height="20" rx="2"/>
+    <rect x="34" y="60" width="20" height="20" rx="2"/>
+    <rect x="60" y="60" width="20" height="20" rx="2"/>
+  </g>
+</svg>

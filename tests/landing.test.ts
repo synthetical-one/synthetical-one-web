@@ -1,8 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 
 describe('landing page', () => {
   const html = () => readFileSync('dist/index.html', 'utf8');
+
+  it('links a favicon', () => {
+    expect(html()).toContain('rel="icon"');
+  });
+  it('ships the favicon file in the build output', () => {
+    expect(existsSync('dist/favicon.svg')).toBe(true);
+  });
 
   it('links to the YouTube channel', () => {
     expect(html()).toContain('https://www.youtube.com/@synthetical-media');

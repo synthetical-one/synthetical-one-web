@@ -3,8 +3,12 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import { bestOn, GROUND } from '../lib/palette';
 
-interface Props { entry: CollectionEntry<'characters'>; headingLevel?: 'h1' | 'h2' }
-const { entry, headingLevel = 'h2' } = Astro.props;
+interface Props {
+  entry: CollectionEntry<'characters'>;
+  headingLevel?: 'h1' | 'h2';
+  showProfileLink?: boolean;
+}
+const { entry, headingLevel = 'h2', showProfileLink = true } = Astro.props;
 const d = entry.data;
 const onField = bestOn(d.colourHex);
 const Heading = headingLevel;
@@ -36,7 +40,9 @@ const Heading = headingLevel;
       {d.companion && <div><dt>COMPANION</dt><dd>{d.companion}</dd></div>}
       {d.scale && <div><dt>SCALE</dt><dd>{d.scale}</dd></div>}
     </dl>
-    <a class="more chip" href={`/characters/${entry.id}/`}>Read the full profile →</a>
+    {showProfileLink && (
+      <a class="more chip" href={`/characters/${entry.id}/`}>Read the full profile →</a>
+    )}
   </div>
 </section>
 

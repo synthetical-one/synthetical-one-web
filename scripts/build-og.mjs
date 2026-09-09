@@ -110,6 +110,18 @@ console.log(
 const CARD_MAX_HEIGHT = 480;
 const CARD_MAX_WIDTH = 700;
 
+// The character band (CharacterBand.astro) never sets a portrait loose on
+// the colour field directly -- it always sits inside a bone (`--mount`)
+// panel first, which is what makes the crop read as a deliberate specimen
+// plate rather than a stray image. The per-character OG card must match
+// that treatment: composite the portrait onto its own bone mount rectangle
+// (a modest, even margin on all sides), then composite *that* mount onto
+// the colour field. The band's mount padding is 14px at its ~400px portrait
+// scale; this card's portraits run up to 480px, and the card itself is
+// viewed at social-share scale (often shrunk in a feed), so the margin is
+// scaled up accordingly rather than reused verbatim.
+const MOUNT_MARGIN = 32;
+
 function readColourHex(slug) {
   const raw = readFileSync(`src/content/characters/${slug}.md`, 'utf8');
   const match = raw.match(/^colourHex:\s*"?(#[0-9A-Fa-f]{6})"?/m);
@@ -121,6 +133,10 @@ mkdirSync('public/og', { recursive: true });
 
 for (const slug of SLUGS) {
   const colourHex = readColourHex(slug);
+  // fit: 'inside' with withoutEnlargement: false lets small source portraits
+  // (e.g. gyro.png at 216x356) upscale to fill the target box, matching
+  // CharacterBand's own treatment of the same crops -- see the NOTE above
+  // CARD_MAX_HEIGHT for why that's the right call here too.
   const portraitBuffer = await sharp(`src/assets/characters/${slug}.png`)
     .resize({
       width: CARD_MAX_WIDTH,
@@ -130,9 +146,26 @@ for (const slug of SLUGS) {
     })
     .png()
     .toBuffer();
-  const meta = await sharp(portraitBuffer).metadata();
-  const left = Math.round((CANVAS_WIDTH - meta.width) / 2);
-  const top = Math.round((CANVAS_HEIGHT - meta.height) / 2);
+  const portraitMeta = await sharp(portraitBuffer).metadata();
+
+  // Bone mount panel: the portrait plus an even margin on all sides,
+  // matching the band's specimen-plate treatment (see MOUNT_MARGIN note).
+  const mountWidth = portraitMeta.width + MOUNT_MARGIN * 2;
+  const mountHeight = portraitMeta.height + MOUNT_MARGIN * 2;
+  const mountBuffer = await sharp({
+    create: {
+      width: mountWidth,
+      height: mountHeight,
+      channels: 3,
+      background: BACKGROUND,
+    },
+  })
+    .composite([{ input: portraitBuffer, left: MOUNT_MARGIN, top: MOUNT_MARGIN }])
+    .png()
+    .toBuffer();
+
+  const left = Math.round((CANVAS_WIDTH - mountWidth) / 2);
+  const top = Math.round((CANVAS_HEIGHT - mountHeight) / 2);
 
   await sharp({
     create: {
@@ -142,11 +175,11 @@ for (const slug of SLUGS) {
       background: colourHex,
     },
   })
-    .composite([{ input: portraitBuffer, left, top }])
+    .composite([{ input: mountBuffer, left, top }])
     .png()
     .toFile(`public/og/${slug}.png`);
 
   console.log(
-    `wrote public/og/${slug}.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), field ${colourHex}, portrait ${meta.width}x${meta.height}`,
+    `wrote public/og/${slug}.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), field ${colourHex}, portrait ${portraitMeta.width}x${portraitMeta.height}, mount ${mountWidth}x${mountHeight}`,
   );
 }

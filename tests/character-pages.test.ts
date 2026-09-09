@@ -42,6 +42,20 @@ describe('character pages', () => {
     const html = readFileSync(`dist/characters/${slug}/index.html`, 'utf8');
     expect(html).toMatch(new RegExp(`<meta property="og:image" content="[^"]*/og/${slug}\\.png"`));
   });
+
+  it.each(SLUGS)('%s page does not link to its own profile', (slug) => {
+    const html = readFileSync(`dist/characters/${slug}/index.html`, 'utf8');
+    expect(html).not.toContain(`href="/characters/${slug}/"`);
+  });
+});
+
+describe('landing page profile links', () => {
+  it('links to all eight character profiles', () => {
+    const html = readFileSync('dist/index.html', 'utf8');
+    for (const slug of SLUGS) {
+      expect(html).toContain(`href="/characters/${slug}/"`);
+    }
+  });
 });
 
 describe('character OG cards', () => {

@@ -1,0 +1,32 @@
+---
+interface Props { href?: string }
+const { href } = Astro.props;
+const Tag = href ? 'a' : 'div';
+---
+<Tag class="brand" {...(href ? { href } : {})}>
+  <svg class="mark" viewBox="0 0 88 88" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <g fill="currentColor">
+      <rect x="8"  y="8"  width="20" height="20" rx="2"/>
+      <rect x="34" y="8"  width="20" height="20" rx="2"/>
+      <rect x="60" y="8"  width="20" height="20" rx="2"/>
+      <rect x="8"  y="34" width="20" height="20" rx="2"/>
+      <rect x="60" y="34" width="20" height="20" rx="2"/>
+      <rect x="8"  y="60" width="20" height="20" rx="2"/>
+      <rect x="34" y="60" width="20" height="20" rx="2"/>
+      <rect x="60" y="60" width="20" height="20" rx="2"/>
+    </g>
+  </svg>
+  <span class="wordmark">synthetical</span>
+</Tag>
+
+<style>
+  .brand {
+    display: flex; align-items: center; gap: 18px;
+    text-decoration: none;
+  }
+  .mark { width: clamp(56px, 6vw, 72px); height: clamp(56px, 6vw, 72px); color: var(--ink); flex-shrink: 0; }
+  .wordmark {
+    font-family: var(--font-mono); font-size: clamp(20px, 2.4vw, 28px);
+    letter-spacing: -.01em; color: var(--ink); text-transform: lowercase;
+  }
+</style>

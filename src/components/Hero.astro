@@ -1,22 +1,9 @@
 ---
 import { YOUTUBE_URL, TAGLINE } from '../lib/site';
+import BrandLockup from './BrandLockup.astro';
 ---
 <header class="hero">
-  <div class="brand">
-    <svg class="mark" viewBox="0 0 88 88" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      <g fill="currentColor">
-        <rect x="8"  y="8"  width="20" height="20" rx="2"/>
-        <rect x="34" y="8"  width="20" height="20" rx="2"/>
-        <rect x="60" y="8"  width="20" height="20" rx="2"/>
-        <rect x="8"  y="34" width="20" height="20" rx="2"/>
-        <rect x="60" y="34" width="20" height="20" rx="2"/>
-        <rect x="8"  y="60" width="20" height="20" rx="2"/>
-        <rect x="34" y="60" width="20" height="20" rx="2"/>
-        <rect x="60" y="60" width="20" height="20" rx="2"/>
-      </g>
-    </svg>
-    <span class="wordmark">synthetical</span>
-  </div>
+  <BrandLockup />
   <p class="kicker">AI-native media studio — N°001–008</p>
   <h1>Same world.<br />Different questions.</h1>
   <p class="lede">{TAGLINE}</p>
@@ -25,14 +12,7 @@ import { YOUTUBE_URL, TAGLINE } from '../lib/site';
 
 <style>
   .hero { padding: clamp(48px, 9vw, 108px) var(--gutter) clamp(36px, 6vw, 72px); }
-  .brand {
-    display: flex; align-items: center; gap: 18px; margin: 0 0 32px;
-  }
-  .mark { width: clamp(56px, 6vw, 72px); height: clamp(56px, 6vw, 72px); color: var(--ink); flex-shrink: 0; }
-  .wordmark {
-    font-family: var(--font-mono); font-size: clamp(20px, 2.4vw, 28px);
-    letter-spacing: -.01em; color: var(--ink); text-transform: lowercase;
-  }
+  .hero :global(.brand) { margin: 0 0 32px; }
   .kicker {
     font-family: var(--font-mono); font-size: 12px; letter-spacing: .24em;
     text-transform: uppercase; color: var(--ink-soft); margin: 0 0 22px;

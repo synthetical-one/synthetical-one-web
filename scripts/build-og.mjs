@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 
 // Canon order per src/content/characters/*.md frontmatter (`order: 1`-`8`):
 // gyro, valve, hikmah, ledger, echo, roam, prism, prompt.
@@ -91,3 +91,62 @@ await sharp({
 console.log(
   `wrote public/og-default.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), portrait height ${targetHeight}px, row width ${rowWidth}px, startX ${startX}, rowTop ${rowTop}`,
 );
+
+// --- Per-character share cards -------------------------------------------
+//
+// Each character's shared link should unfurl showing *that* character, not
+// the eight-up roster card above. One 1200x630 card per slug, background set
+// to the character's canon colourHex (read straight from its frontmatter, so
+// this can never drift from content), with their portrait scaled to fit
+// comfortably and centred with generous margin. No text (see NOTE at top of
+// og-default.png generation, above, for why sharp-rendered text is avoided).
+
+// A single portrait alone (not eight-across) can read at a much larger
+// scale than og-default.png's row does. All eight crops are narrow
+// full-body figures (aspect ratios ~0.33-0.61, per crops.json), so height is
+// always the binding constraint below MAX_WIDTH; capping height at 480px
+// (~76% of the 630px canvas) leaves a 75px margin top and bottom, comfortably
+// clear of the 1200px width even for the widest crop.
+const CARD_MAX_HEIGHT = 480;
+const CARD_MAX_WIDTH = 700;
+
+function readColourHex(slug) {
+  const raw = readFileSync(`src/content/characters/${slug}.md`, 'utf8');
+  const match = raw.match(/^colourHex:\s*"?(#[0-9A-Fa-f]{6})"?/m);
+  if (!match) throw new Error(`no colourHex frontmatter found for ${slug}`);
+  return match[1];
+}
+
+mkdirSync('public/og', { recursive: true });
+
+for (const slug of SLUGS) {
+  const colourHex = readColourHex(slug);
+  const portraitBuffer = await sharp(`src/assets/characters/${slug}.png`)
+    .resize({
+      width: CARD_MAX_WIDTH,
+      height: CARD_MAX_HEIGHT,
+      fit: 'inside',
+      withoutEnlargement: false,
+    })
+    .png()
+    .toBuffer();
+  const meta = await sharp(portraitBuffer).metadata();
+  const left = Math.round((CANVAS_WIDTH - meta.width) / 2);
+  const top = Math.round((CANVAS_HEIGHT - meta.height) / 2);
+
+  await sharp({
+    create: {
+      width: CANVAS_WIDTH,
+      height: CANVAS_HEIGHT,
+      channels: 3,
+      background: colourHex,
+    },
+  })
+    .composite([{ input: portraitBuffer, left, top }])
+    .png()
+    .toFile(`public/og/${slug}.png`);
+
+  console.log(
+    `wrote public/og/${slug}.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), field ${colourHex}, portrait ${meta.width}x${meta.height}`,
+  );
+}

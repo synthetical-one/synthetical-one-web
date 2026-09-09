@@ -1,0 +1,81 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import BrandLockup from '../../components/BrandLockup.astro';
+import CharacterBand from '../../components/CharacterBand.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { YOUTUBE_URL } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('characters')).sort(
+    (a, b) => a.data.order - b.data.order,
+  );
+  return all.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: {
+      entry,
+      prev: all[(i - 1 + all.length) % all.length],
+      next: all[(i + 1) % all.length],
+    },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+<Base
+  title={`${d.name} — ${d.archetype} — Synthetical`}
+  description={`${d.name}, the ${d.archetype}. “${d.coreQuestion}” ${d.tagline}`}
+  ogImage={`/og/${entry.id}.png`}
+>
+  <header class="masthead">
+    <BrandLockup href="/" />
+  </header>
+
+  <CharacterBand entry={entry} headingLevel="h1" />
+
+  <article class="bio">
+    <p class="tagline">{d.tagline}</p>
+    <Content />
+  </article>
+
+  <nav class="pager">
+    <a href={`/characters/${prev.id}/`}>← {prev.data.catalogue} {prev.data.name}</a>
+    <a href={`/characters/${next.id}/`}>{next.data.catalogue} {next.data.name} →</a>
+  </nav>
+
+  <section class="cta-band">
+    <p>Watch {d.name} and the rest of the eight.</p>
+    <a href={YOUTUBE_URL} rel="noopener">Subscribe on YouTube →</a>
+  </section>
+
+  <SiteFooter />
+</Base>
+
+<style>
+  .masthead { padding: clamp(24px, 4vw, 40px) var(--gutter) 0; }
+  .bio { padding: clamp(40px, 7vw, 88px) var(--gutter); max-width: 74ch; }
+  .tagline {
+    font-family: var(--font-display); font-weight: 500;
+    font-size: clamp(22px, 3vw, 34px); line-height: 1.15; letter-spacing: -.02em;
+    margin: 0 0 32px;
+  }
+  .bio :global(p) { margin: 0 0 18px; line-height: 1.68; font-size: 17px; color: var(--ink-soft); max-width: var(--measure); }
+  .pager {
+    display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    padding: 0 var(--gutter) clamp(40px, 6vw, 72px);
+    font-family: var(--font-mono); font-size: 13px; letter-spacing: .1em;
+  }
+  .pager a { color: var(--ink); }
+  .cta-band {
+    padding: clamp(36px, 6vw, 72px) var(--gutter);
+    border-top: 1px solid rgba(20,22,27,.18);
+    display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: space-between;
+  }
+  .cta-band p { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: -.015em; }
+  .cta-band a {
+    background: var(--ink); color: var(--bone); padding: 15px 28px; text-decoration: none;
+    font-family: var(--font-mono); font-size: 13px; letter-spacing: .16em; text-transform: uppercase;
+  }
+</style>

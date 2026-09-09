@@ -1,0 +1,91 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { bestOn, GROUND } from '../lib/palette';
+
+interface Props { entry: CollectionEntry<'characters'>; headingLevel?: 'h1' | 'h2' }
+const { entry, headingLevel = 'h2' } = Astro.props;
+const d = entry.data;
+const onField = bestOn(d.colourHex);
+const Heading = headingLevel;
+---
+<section
+  class="band"
+  style={`--field:${d.colourHex}; --on-field:${onField}; --mount:${GROUND.bone}; --focus-ring:${onField}`}
+>
+  <div class="mount">
+    <Image
+      src={d.portrait}
+      alt={`${d.name}, the ${d.archetype} — front view of the character`}
+      height={400}
+      densities={[1, 2]}
+    />
+    <p class="cap">{d.catalogue} · REFERENCE · v1.0</p>
+  </div>
+
+  <div class="copy">
+    <p class="cat chip">{d.catalogue} — {d.archetype.toUpperCase()}</p>
+    <Heading class="name">{d.name}</Heading>
+    <p class="q" set:html={`“${d.coreQuestion}”`} />
+    <dl class="spec">
+      <div><dt>AESTHETIC</dt><dd>{d.aesthetic}</dd></div>
+      <div><dt>COLOUR</dt><dd>{d.colourName}</dd></div>
+      <div><dt>HOME</dt><dd>{d.home}</dd></div>
+      <div><dt>ROLE</dt><dd>{d.role}</dd></div>
+      {d.accessory && <div><dt>ACCESSORY</dt><dd>{d.accessory}</dd></div>}
+      {d.companion && <div><dt>COMPANION</dt><dd>{d.companion}</dd></div>}
+      {d.scale && <div><dt>SCALE</dt><dd>{d.scale}</dd></div>}
+    </dl>
+    <a class="more chip" href={`/characters/${entry.id}/`}>Read the full profile →</a>
+  </div>
+</section>
+
+<style>
+  .band {
+    background: var(--field); color: var(--on-field);
+    display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(20px, 4vw, 48px); align-items: end;
+    padding: clamp(24px, 4vw, 52px); margin-bottom: 4px;
+  }
+  @media (max-width: 720px) { .band { grid-template-columns: 1fr; } }
+
+  .mount {
+    background: var(--mount); padding: 14px 14px 0; align-self: end;
+    display: flex; justify-content: center; align-items: flex-end;
+  }
+  .mount :global(img) {
+    display: block; max-height: 400px; width: auto; height: auto;
+  }
+  .cap {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em;
+    color: var(--ink-soft); margin: 0; padding: 9px 0 11px; text-align: center;
+  }
+
+  .chip {
+    display: inline-block; background: var(--mount); color: var(--ink);
+    font-family: var(--font-mono); letter-spacing: .12em;
+    padding: 5px 10px;
+  }
+  .cat { font-size: 13px; letter-spacing: .2em; margin: 0 0 10px; }
+  .name {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(52px, 9vw, 116px); line-height: .82; letter-spacing: -.035em;
+    text-transform: uppercase; margin: 0;
+  }
+  .q {
+    font-family: var(--font-display); font-weight: 500;
+    font-size: clamp(24px, 2.5vw, 30px); line-height: 1.15; margin: 20px 0 0;
+  }
+  .spec {
+    margin: 26px 0 0; background: var(--mount); color: var(--ink);
+    padding: 16px 18px; display: grid; gap: 6px 26px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    font-family: var(--font-mono); font-size: 11.5px;
+  }
+  .spec div { display: flex; gap: 8px; }
+  .spec dt { color: var(--ink-soft); margin: 0; }
+  .spec dd { margin: 0; }
+  .more {
+    margin-top: 22px; font-size: 13px;
+  }
+</style>

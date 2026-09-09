@@ -1,7 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
+import CharacterBand from '../components/CharacterBand.astro';
 import { TAGLINE } from '../lib/site';
+import { getCollection } from 'astro:content';
+
+const characters = (await getCollection('characters')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
 ---
 <Base title="Synthetical — an AI-native media studio" description={TAGLINE}>
   <h1>Synthetical</h1>
+  {characters.map((entry) => <CharacterBand entry={entry} />)}
 </Base>

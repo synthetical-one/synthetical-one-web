@@ -1,5 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { artModeIssue } from './lib/artMode';
 
 const characters = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/characters' }),
@@ -31,35 +32,15 @@ const characters = defineCollection({
       // A poster/plate promotion should mean supplying the matching art, not
       // just flipping artMode — without this, a poster character missing a
       // cutout silently falls back to the plate branch instead of failing
-      // the build.
-      .refine(
-        (data) => {
-          if (data.artMode === 'poster') return Boolean(data.cutout) && !data.duotone;
-          return Boolean(data.duotone) && !data.cutout;
-        },
-        {
-          // zod v4's `.refine` only resolves a dynamic message via an
-          // `error` function on the params object (a bare function as the
-          // second argument is not recognised) — the offending record comes
-          // through as `issue.input`, not as a second callback argument.
-          error: (issue) => {
-            const data = issue.input as {
-              name: string;
-              artMode: 'poster' | 'plate';
-              cutout?: unknown;
-              duotone?: unknown;
-            };
-            if (data.artMode === 'poster') {
-              return `${data.name} is artMode "poster" but ${
-                !data.cutout ? 'has no cutout image' : 'still has a duotone image'
-              }. Poster characters need a cutout and must not have a duotone.`;
-            }
-            return `${data.name} is artMode "plate" but ${
-              !data.duotone ? 'has no duotone image' : 'still has a cutout image'
-            }. Plate characters need a duotone and must not have a cutout.`;
-          },
-        },
-      ),
+      // the build. The predicate itself lives in ../lib/artMode so it can be
+      // unit-tested directly, without going through Astro's content pipeline.
+      .refine((data) => artModeIssue(data) === null, {
+        // zod v4's `.refine` only resolves a dynamic message via an `error`
+        // function on the params object (a bare function as the second
+        // argument is not recognised) — the offending record comes through
+        // as `issue.input`, not as a second callback argument.
+        error: (issue) => artModeIssue(issue.input as Parameters<typeof artModeIssue>[0]),
+      }),
 });
 
 export const collections = { characters };

@@ -129,6 +129,46 @@ const isPoster = d.artMode === 'poster';
   }
   @media (max-width: 720px) {
     .plate, .poster { grid-template-columns: 1fr; }
+
+    /* Below the column collapse, .rail becomes full-width and stacks under
+       the figure — the desktop vertical diagonal (a fixed % of *width*) no
+       longer has anything to do with where the rail sits, so it was putting
+       the catalogue mark, furniture and the first micro-copy words directly
+       on the saturated field. Swap it for a horizontal cut: field on top
+       (name + cutout), bone beneath (the whole rail). This is how the print
+       poster reflows anyway — not a compromise on the diagonal identity. */
+    .band[data-mode='poster']::before {
+      clip-path: polygon(0 0, 100% 0, 100% 46%, 0 52%);
+    }
+
+    .poster {
+      min-height: 0;
+      padding-top: clamp(20px, 7vw, 32px);
+    }
+
+    /* No longer absolutely positioned: Finding 2 — position:absolute +
+       bottom:0 put .poster-name in the same box as .q at the bottom of the
+       (now full-width) rail, and the two overlapped. In normal flow it
+       simply stacks above the rail and can never collide with it. */
+    .poster-name {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      z-index: 0;
+      text-align: center;
+      font-size: clamp(48px, 18vw, 110px);
+      margin: 0 0 -8vw;
+    }
+
+    .poster :global(.cutout) {
+      display: block;
+      margin: 0 auto;
+      max-height: 34vh;
+    }
+
+    .rail {
+      padding-top: clamp(20px, 6vw, 28px);
+    }
   }
   .mount { background: var(--mount); padding: 14px 14px 0; align-self: end; }
   .mount :global(img) { display: block; max-height: 340px; width: auto; height: auto; margin: 0 auto; }

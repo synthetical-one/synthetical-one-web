@@ -14,6 +14,10 @@ tagline: "Good ideas should be dangerous."
 portrait: "../../assets/characters/prompt.png"
 order: 8
 status: "live"
+artMode: "poster"
+fieldHex: "#F3BB19"
+cutout: "../../assets/cutouts/prompt.png"
+microCopy: ["THINK", "EXPLORE", "CREATE", "TOGETHER"]
 ---
 
 Curious, inventive, analytical, provocative, independent, witty, open-minded, and

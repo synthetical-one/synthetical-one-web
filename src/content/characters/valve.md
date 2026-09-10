@@ -15,6 +15,10 @@ tagline: "If it can be imagined, it can be built."
 portrait: "../../assets/characters/valve.png"
 order: 2
 status: "live"
+artMode: "plate"
+fieldHex: "#B45309"
+duotone: "../../assets/duotone/valve.png"
+microCopy: []
 ---
 
 Curious, analytical, practical, experimental, eccentric, technically brilliant, and

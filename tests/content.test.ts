@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
-import { CHARACTER_COLOURS } from '../src/lib/palette';
+import { CHARACTER_COLOURS, FIELD_COLOURS } from '../src/lib/palette';
 
 const DIR = 'src/content/characters';
 const CORE_QUESTIONS: Record<string, string> = {
@@ -53,5 +53,32 @@ describe('character content', () => {
   it('orders are 1..8 with no duplicates', () => {
     const orders = Object.keys(CHARACTER_COLOURS).map((s) => Number(frontmatter(s).order));
     expect([...new Set(orders)].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+  });
+});
+
+const POSTER = ['echo', 'prompt'];
+const PLATE = ['gyro', 'valve', 'hikmah', 'ledger', 'roam', 'prism'];
+
+describe('poster system fields', () => {
+  it.each(POSTER)('%s is in poster mode', (slug) => {
+    expect(frontmatter(slug).artMode).toBe('poster');
+  });
+
+  it.each(PLATE)('%s is in plate mode', (slug) => {
+    expect(frontmatter(slug).artMode).toBe('plate');
+  });
+
+  it('poster characters use their sampled field, not their canon colour', () => {
+    expect(frontmatter('echo').fieldHex).toBe('#0D888F');
+    expect(frontmatter('prompt').fieldHex).toBe('#F3BB19');
+    expect(frontmatter('echo').fieldHex).not.toBe(frontmatter('echo').colourHex);
+  });
+
+  it.each(PLATE)('%s falls back to its canon colour as field', (slug) => {
+    expect(frontmatter(slug).fieldHex).toBe(frontmatter(slug).colourHex);
+  });
+
+  it.each(POSTER)('%s fieldHex matches FIELD_COLOURS constant', (slug) => {
+    expect(frontmatter(slug).fieldHex).toBe(FIELD_COLOURS[slug as keyof typeof FIELD_COLOURS]);
   });
 });

@@ -15,6 +15,10 @@ tagline: "Perspective keeps us human."
 portrait: "../../assets/characters/gyro.png"
 order: 1
 status: "live"
+artMode: "plate"
+fieldHex: "#0E7C4A"
+duotone: "../../assets/duotone/gyro.png"
+microCopy: []
 ---
 
 Curious, strategic, calm, confident, skeptical, intellectually generous, dryly

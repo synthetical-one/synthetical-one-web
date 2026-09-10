@@ -14,6 +14,10 @@ tagline: "A wider world makes a kinder one."
 portrait: "../../assets/characters/roam.png"
 order: 6
 status: "live"
+artMode: "plate"
+fieldHex: "#0369A1"
+duotone: "../../assets/duotone/roam.png"
+microCopy: []
 ---
 
 Curious, adventurous, optimistic, spontaneous, empathetic, imaginative, social,

@@ -15,6 +15,10 @@ tagline: "Facts endure. That's a comforting thought."
 portrait: "../../assets/characters/ledger.png"
 order: 4
 status: "live"
+artMode: "plate"
+fieldHex: "#8C2F39"
+duotone: "../../assets/duotone/ledger.png"
+microCopy: []
 ---
 
 Meticulous, reliable, thoughtful, principled, observant, patient, and quietly

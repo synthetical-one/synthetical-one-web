@@ -21,6 +21,11 @@ const characters = defineCollection({
       portrait: image(),
       order: z.number().int().min(1).max(8),
       status: z.enum(['live', 'coming-soon']),
+      artMode: z.enum(['poster', 'plate']),
+      fieldHex: z.string().regex(/^#[0-9A-F]{6}$/),
+      microCopy: z.array(z.string()).default([]),
+      cutout: image().optional(),
+      duotone: image().optional(),
     }),
 });
 

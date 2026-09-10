@@ -15,6 +15,10 @@ tagline: "Deeper questions lead to brighter tomorrows."
 portrait: "../../assets/characters/hikmah.png"
 order: 3
 status: "live"
+artMode: "plate"
+fieldHex: "#2563EB"
+duotone: "../../assets/duotone/hikmah.png"
+microCopy: []
 ---
 
 Thoughtful, empathetic, principled, calm, nuanced, compassionate, reflective,

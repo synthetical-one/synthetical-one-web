@@ -14,6 +14,10 @@ tagline: "Great conversations bring people closer."
 portrait: "../../assets/characters/echo.png"
 order: 5
 status: "live"
+artMode: "poster"
+fieldHex: "#0D888F"
+cutout: "../../assets/cutouts/echo.png"
+microCopy: ["LISTEN", "THINK", "EXPLORE", "DISCUSS", "REPEAT"]
 ---
 
 Warm, curious, empathetic, inclusive, charismatic, insightful, adaptable,

@@ -14,6 +14,10 @@ tagline: "If you learn to see the beauty in something, you become less willing t
 portrait: "../../assets/characters/prism.png"
 order: 7
 status: "live"
+artMode: "plate"
+fieldHex: "#7C5FBF"
+duotone: "../../assets/duotone/prism.png"
+microCopy: []
 ---
 
 Artistic, observant, sensitive, imaginative, and quietly expressive.

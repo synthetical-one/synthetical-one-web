@@ -21,6 +21,17 @@ export const CHARACTER_COLOURS: Record<CharacterSlug, string> = {
   prompt: '#6D28D9',
 };
 
+/**
+ * Poster field colours — the stage a character stands on, chosen to contrast
+ * them rather than match them. Distinct from CHARACTER_COLOURS, which holds
+ * their frozen canon colour. Sampled from the owner's supplied posters.
+ * Present only for characters with poster art.
+ */
+export const FIELD_COLOURS: Partial<Record<CharacterSlug, string>> = {
+  echo: '#0D888F',
+  prompt: '#F3BB19',
+};
+
 function channel(value: number): number {
   const c = value / 255;
   return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);

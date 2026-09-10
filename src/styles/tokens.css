@@ -11,6 +11,8 @@
 
   --measure: 60ch;
   --gutter: clamp(20px, 4vw, 48px);
+  --grain-opacity: 0.055;
+  --diagonal: 72%;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

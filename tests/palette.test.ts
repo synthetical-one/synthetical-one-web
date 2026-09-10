@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { GROUND, CHARACTER_COLOURS, contrastRatio, bestOn } from '../src/lib/palette';
+import { GROUND, CHARACTER_COLOURS, FIELD_COLOURS, contrastRatio, bestOn } from '../src/lib/palette';
 
 describe('contrastRatio', () => {
   it('is 21:1 for black on white', () => {
@@ -60,5 +60,23 @@ describe('tokens.css matches palette.ts', () => {
     ['ink-soft', GROUND.inkSoft],
   ])('--%s equals the palette value', (name, expected) => {
     expect(readVar(name)).toBe(expected.toUpperCase());
+  });
+});
+
+describe('poster field colours', () => {
+  it('has a field for echo and prompt', () => {
+    expect(FIELD_COLOURS.echo).toBe('#0D888F');
+    expect(FIELD_COLOURS.prompt).toBe('#F3BB19');
+  });
+
+  it.each(Object.entries(FIELD_COLOURS))(
+    '%s field carries display type at 3:1 or better',
+    (_slug, hex) => {
+      expect(contrastRatio(bestOn(hex as string), hex as string)).toBeGreaterThanOrEqual(3);
+    },
+  );
+
+  it('bone is unusable on the yellow field, so small text must not go there', () => {
+    expect(contrastRatio(GROUND.bone, '#F3BB19')).toBeLessThan(3);
   });
 });

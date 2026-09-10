@@ -29,7 +29,7 @@ const d = entry.data;
   description={`${d.name}, the ${d.archetype}. “${d.coreQuestion}” ${d.tagline}`}
   ogImage={`/og/${entry.id}.png`}
 >
-  <header class="masthead">
+  <header class="masthead" slot="header">
     <BrandLockup href="/" />
   </header>
 
@@ -40,7 +40,7 @@ const d = entry.data;
     <Content />
   </article>
 
-  <nav class="pager">
+  <nav class="pager" aria-label="Roster">
     <a href={`/characters/${prev.id}/`}>← {prev.data.catalogue} {prev.data.name}</a>
     <a href={`/characters/${next.id}/`}>{next.data.catalogue} {next.data.name} →</a>
   </nav>
@@ -50,7 +50,7 @@ const d = entry.data;
     <a href={YOUTUBE_URL} rel="noopener">Subscribe on YouTube →</a>
   </section>
 
-  <SiteFooter />
+  <SiteFooter slot="footer" />
 </Base>
 
 <style>

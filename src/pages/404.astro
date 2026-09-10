@@ -2,14 +2,19 @@
 import Base from '../layouts/Base.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 ---
-<Base title="Not found — Synthetical" description="That page does not exist.">
+<Base
+  title="Not found — Synthetical"
+  description="That page does not exist."
+  canonicalPath="/"
+  noindex
+>
   <section class="nf">
     <p class="cat">ERROR — 404</p>
     <h1>Nothing here.</h1>
     <p class="b">The page you asked for does not exist. The eight, however, do.</p>
     <a href="/">Back to the universe →</a>
   </section>
-  <SiteFooter />
+  <SiteFooter slot="footer" />
 </Base>
 
 <style>

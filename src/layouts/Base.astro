@@ -5,9 +5,22 @@ import '../styles/motion.css';
 import Grain from '../components/Grain.astro';
 import { SITE_NAME, SITE_URL } from '../lib/site';
 
-interface Props { title: string; description: string; ogImage?: string }
-const { title, description, ogImage } = Astro.props;
-const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  /**
+   * Override the self-referential canonical. Only pages whose own URL is not
+   * a real, resolvable address need this — see src/pages/404.astro, which
+   * Astro emits as `dist/404.html` (a file, not a `/404/` directory), so a
+   * canonical pointing at its own path would name a URL that 404s.
+   */
+  canonicalPath?: string;
+  /** Ask search engines not to index this page (again: the 404). */
+  noindex?: boolean;
+}
+const { title, description, ogImage, canonicalPath, noindex = false } = Astro.props;
+const canonical = new URL(canonicalPath ?? Astro.url.pathname, SITE_URL).href;
 const image = new URL(ogImage ?? '/og-default.png', SITE_URL).href;
 ---
 <!doctype html>
@@ -19,6 +32,7 @@ const image = new URL(ogImage ?? '/og-default.png', SITE_URL).href;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={title} />
@@ -30,7 +44,19 @@ const image = new URL(ogImage ?? '/og-default.png', SITE_URL).href;
   <body>
     <Grain />
     <a class="skip" href="#main">Skip to content</a>
+    {/*
+      The masthead and footer are siblings of <main>, never descendants of it.
+      Per HTML-AAM, <header> maps to the `banner` role and <footer> to
+      `contentinfo` only when they are *not* inside <main> (or an article /
+      aside / nav / section). Nesting them in the page slot, as an earlier
+      version did, collapsed every page to a single `main` landmark, so a
+      screen-reader user had no way to jump to the masthead or the footer.
+      Pages therefore fill the named `header` / `footer` slots instead of
+      rendering those elements inline. The skip link still targets #main.
+    */}
+    <slot name="header" />
     <main id="main" tabindex="-1"><slot /></main>
+    <slot name="footer" />
     <style>
       .skip {
         position: absolute; left: -9999px;

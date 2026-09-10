@@ -140,16 +140,64 @@ function readFrontmatterHex(slug, field) {
   return match[1];
 }
 
+// --- Poster wedge geometry -------------------------------------------------
+//
+// The site's poster bands are built on a hard diagonal split (see
+// src/styles/tokens.css's --diagonal: 72% and CharacterBand.astro's
+// `.band[data-mode='poster']::before` clip-path): a saturated field
+// occupies the left 72% of the frame at the top, narrowing to 50% at the
+// bottom, with a bone region filling the rest. The first pass at these
+// cards dropped the mount (correctly) but also dropped the diagonal, which
+// left poster-mode cards as a bare field with the figure floating dead
+// centre -- no rectangle for the eye to land on the way plate-mode's mount
+// gives it one. This restores the diagonal as a two-tone background, and
+// moves the cut-out left-of-centre so its lower body stands astride the
+// boundary rather than sitting entirely inside one region, matching how the
+// character always straddles the line on the site.
+//
+// Built as a single SVG (field rect + bone polygon) rather than a
+// clip-path composite, since sharp has no clip-path primitive of its own;
+// an SVG string rasterized by sharp is the simplest way to get an
+// anti-aliased diagonal edge in one shot.
+const POSTER_FIELD_TOP_PCT = 0.72;
+// The site recedes the diagonal only to 50% by the bottom of its own band,
+// but that band reserves a ~26%-wide bone rail for text down its full
+// height, so the site's diagonal never has to cross a standing figure to
+// read as a boundary -- the rail is already bone regardless. This card has
+// no rail: the only way the diagonal can do its job (read as a deliberate
+// two-region split the figure stands astride, rather than a triangle
+// floating behind it) is if it actually recedes far enough to cross the
+// figure's own footprint. 30% -- checked by rendering both cards and
+// reading them at og-share thumbnail scale -- is where that crossing
+// becomes visible without the bone wedge swallowing the card.
+const POSTER_FIELD_BOTTOM_PCT = 0.3;
+// Left-of-centre anchor for the cut-out. Chosen (rather than derived from
+// the site's grid, which reserves a text rail this card doesn't have) so
+// that both poster figures' lower bodies cross the bottom diagonal by a
+// visible margin while their tops stay clear inside the field -- verified
+// by reading the rendered cards, not by formula alone.
+const POSTER_FIGURE_CENTER_X = Math.round(CANVAS_WIDTH * 0.44);
+const POSTER_BOTTOM_MARGIN = 40;
+
+function posterFieldSvg(field) {
+  const topX = CANVAS_WIDTH * POSTER_FIELD_TOP_PCT;
+  const bottomX = CANVAS_WIDTH * POSTER_FIELD_BOTTOM_PCT;
+  return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${CANVAS_WIDTH}" height="${CANVAS_HEIGHT}">
+    <rect width="${CANVAS_WIDTH}" height="${CANVAS_HEIGHT}" fill="${field}" />
+    <polygon points="${topX},0 ${CANVAS_WIDTH},0 ${CANVAS_WIDTH},${CANVAS_HEIGHT} ${bottomX},${CANVAS_HEIGHT}" fill="${BACKGROUND}" />
+  </svg>`);
+}
+
 mkdirSync('public/og', { recursive: true });
 
 for (const slug of SLUGS) {
   const field = readFrontmatterHex(slug, 'fieldHex');
 
   // Poster-mode characters (Echo, Prompt) have a transparent cut-out that
-  // sits directly on the field, matching the site -- no bone mount. Plate-
-  // mode characters keep the bone mount around their duotone plate, which is
-  // what makes the crop read as a deliberate specimen rather than a stray
-  // rectangle (see MOUNT_MARGIN note below).
+  // sits directly on the field/bone diagonal, matching the site -- no bone
+  // mount. Plate-mode characters keep the bone mount around their duotone
+  // plate, which is what makes the crop read as a deliberate specimen
+  // rather than a stray rectangle (see MOUNT_MARGIN note below).
   const cutout = `src/assets/cutouts/${slug}.png`;
   const hasCutout = existsSync(cutout);
   const source = hasCutout ? cutout : `src/assets/duotone/${slug}.png`;
@@ -169,29 +217,36 @@ for (const slug of SLUGS) {
     .toBuffer();
   const figureMeta = await sharp(figureBuffer).metadata();
 
-  // What gets centred on the field: the bare cut-out for poster mode, or the
-  // duotone plate wrapped in its bone mount for plate mode.
-  let mountBuffer = figureBuffer;
-  let mountWidth = figureMeta.width;
-  let mountHeight = figureMeta.height;
+  if (hasCutout) {
+    const left = Math.round(POSTER_FIGURE_CENTER_X - figureMeta.width / 2);
+    const top = CANVAS_HEIGHT - POSTER_BOTTOM_MARGIN - figureMeta.height;
 
-  if (!hasCutout) {
-    // Bone mount panel: the plate plus an even margin on all sides,
-    // matching the band's specimen-plate treatment (see MOUNT_MARGIN note).
-    mountWidth = figureMeta.width + MOUNT_MARGIN * 2;
-    mountHeight = figureMeta.height + MOUNT_MARGIN * 2;
-    mountBuffer = await sharp({
-      create: {
-        width: mountWidth,
-        height: mountHeight,
-        channels: 3,
-        background: BACKGROUND,
-      },
-    })
-      .composite([{ input: figureBuffer, left: MOUNT_MARGIN, top: MOUNT_MARGIN }])
+    await sharp(posterFieldSvg(field))
+      .composite([{ input: figureBuffer, left, top }])
       .png()
-      .toBuffer();
+      .toFile(`public/og/${slug}.png`);
+
+    console.log(
+      `wrote public/og/${slug}.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), mode poster, field ${field}, figure ${figureMeta.width}x${figureMeta.height}, centerX ${POSTER_FIGURE_CENTER_X}, top ${top}`,
+    );
+    continue;
   }
+
+  // Bone mount panel: the plate plus an even margin on all sides, matching
+  // the band's specimen-plate treatment (see MOUNT_MARGIN note).
+  const mountWidth = figureMeta.width + MOUNT_MARGIN * 2;
+  const mountHeight = figureMeta.height + MOUNT_MARGIN * 2;
+  const mountBuffer = await sharp({
+    create: {
+      width: mountWidth,
+      height: mountHeight,
+      channels: 3,
+      background: BACKGROUND,
+    },
+  })
+    .composite([{ input: figureBuffer, left: MOUNT_MARGIN, top: MOUNT_MARGIN }])
+    .png()
+    .toBuffer();
 
   const left = Math.round((CANVAS_WIDTH - mountWidth) / 2);
   const top = Math.round((CANVAS_HEIGHT - mountHeight) / 2);
@@ -209,6 +264,6 @@ for (const slug of SLUGS) {
     .toFile(`public/og/${slug}.png`);
 
   console.log(
-    `wrote public/og/${slug}.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), mode ${hasCutout ? 'poster' : 'plate'}, field ${field}, figure ${figureMeta.width}x${figureMeta.height}, mount ${mountWidth}x${mountHeight}`,
+    `wrote public/og/${slug}.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), mode plate, field ${field}, figure ${figureMeta.width}x${figureMeta.height}, mount ${mountWidth}x${mountHeight}`,
   );
 }

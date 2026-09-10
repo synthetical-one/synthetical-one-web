@@ -10,3 +10,7 @@ at-*.png
 # Design docs stay local — they name private paths and record withheld canon.
 # Backed up outside the repo; never commit these to a public repository.
 docs/superpowers/
+
+# Cut-out import sources: absolute paths into a private media library outside
+# this repo. Same reason as above — this repository is public.
+scripts/cutout-sources.local.json

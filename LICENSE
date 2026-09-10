@@ -1,0 +1,21 @@
+Copyright (c) 2026 Synthetical. All rights reserved.
+
+This repository is published for reference only. No licence is granted.
+
+Specifically, and without limiting the above, no permission is given to use,
+copy, modify, merge, publish, distribute, sublicense, sell, train on, or create
+derivative works from any part of this repository, including:
+
+  - the character artwork and every derived image in this repository
+    (src/assets/, public/og/, public/og-default.png), whether original crops,
+    duotone plates, cut-outs or share cards;
+  - the canon text — the eight characters, their names, catalogue numbers,
+    archetypes, core questions and biographies (src/content/);
+  - the Synthetical name, wordmark, logo and other brand marks.
+
+The eight characters and their canon are proprietary. Nothing here places them
+in the public domain or under any open-source licence.
+
+Viewing this repository, and running the site locally for the purpose of
+evaluating or contributing to it, is permitted. Everything else requires prior
+written permission: hello@synthetical.one

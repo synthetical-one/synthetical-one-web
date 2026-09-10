@@ -15,8 +15,11 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/ibm-plex-sans": "^5.3.0",

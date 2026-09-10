@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 
 // Canon order per src/content/characters/*.md frontmatter (`order: 1`-`8`):
 // gyro, valve, hikmah, ledger, echo, roam, prism, prompt.
@@ -95,11 +95,15 @@ console.log(
 // --- Per-character share cards -------------------------------------------
 //
 // Each character's shared link should unfurl showing *that* character, not
-// the eight-up roster card above. One 1200x630 card per slug, background set
-// to the character's canon colourHex (read straight from its frontmatter, so
-// this can never drift from content), with their portrait scaled to fit
-// comfortably and centred with generous margin. No text (see NOTE at top of
-// og-default.png generation, above, for why sharp-rendered text is avoided).
+// the eight-up roster card above. One 1200x630 card per slug, matching the
+// site's own poster/plate split (CharacterBand.astro): poster-mode
+// characters (Echo, Prompt) stand as a transparent cut-out directly on their
+// field with no mount; plate-mode characters sit on their duotone plate,
+// mounted on bone, on their field. Background is the character's fieldHex
+// (read straight from its frontmatter, so this can never drift from
+// content) -- not colourHex, which is a different, frozen canon value. No
+// text (see NOTE at top of og-default.png generation, above, for why
+// sharp-rendered text is avoided).
 
 // A single portrait alone (not eight-across) can read at a much larger
 // scale than og-default.png's row does. All eight crops are narrow
@@ -110,34 +114,51 @@ console.log(
 const CARD_MAX_HEIGHT = 480;
 const CARD_MAX_WIDTH = 700;
 
-// The character band (CharacterBand.astro) never sets a portrait loose on
-// the colour field directly -- it always sits inside a bone (`--mount`)
-// panel first, which is what makes the crop read as a deliberate specimen
-// plate rather than a stray image. The per-character OG card must match
-// that treatment: composite the portrait onto its own bone mount rectangle
-// (a modest, even margin on all sides), then composite *that* mount onto
-// the colour field. The band's mount padding is 14px at its ~400px portrait
-// scale; this card's portraits run up to 480px, and the card itself is
-// viewed at social-share scale (often shrunk in a feed), so the margin is
-// scaled up accordingly rather than reused verbatim.
+// For plate-mode characters, the character band (CharacterBand.astro) never
+// sets the duotone loose on the colour field directly -- it always sits
+// inside a bone (`--mount`) panel first, which is what makes the crop read
+// as a deliberate specimen plate rather than a stray image. The
+// per-character OG card must match that treatment: composite the plate onto
+// its own bone mount rectangle (a modest, even margin on all sides), then
+// composite *that* mount onto the colour field. The band's mount padding is
+// 14px at its ~340px plate scale; this card's plates run up to 480px, and
+// the card itself is viewed at social-share scale (often shrunk in a feed),
+// so the margin is scaled up accordingly rather than reused verbatim.
+// Poster-mode characters get no mount at all -- see the loop below.
 const MOUNT_MARGIN = 32;
 
-function readColourHex(slug) {
+// Read a hex colour straight out of a character's frontmatter. Generalised
+// from the field-name-agnostic pattern shared with build-duotone.mjs's
+// (formerly identically-named) readColourHex, so the same helper now serves
+// both fieldHex (the stage a character stands on) and colourHex (their
+// frozen canon colour) without duplicating the parsing logic per field.
+function readFrontmatterHex(slug, field) {
   const raw = readFileSync(`src/content/characters/${slug}.md`, 'utf8');
-  const match = raw.match(/^colourHex:\s*"?(#[0-9A-Fa-f]{6})"?/m);
-  if (!match) throw new Error(`no colourHex frontmatter found for ${slug}`);
+  const pattern = new RegExp(`^${field}:\\s*"?(#[0-9A-Fa-f]{6})"?`, 'm');
+  const match = raw.match(pattern);
+  if (!match) throw new Error(`no ${field} frontmatter found for ${slug}`);
   return match[1];
 }
 
 mkdirSync('public/og', { recursive: true });
 
 for (const slug of SLUGS) {
-  const colourHex = readColourHex(slug);
-  // fit: 'inside' with withoutEnlargement: false lets small source portraits
-  // (e.g. gyro.png at 216x356) upscale to fill the target box, matching
-  // CharacterBand's own treatment of the same crops -- see the NOTE above
-  // CARD_MAX_HEIGHT for why that's the right call here too.
-  const portraitBuffer = await sharp(`src/assets/characters/${slug}.png`)
+  const field = readFrontmatterHex(slug, 'fieldHex');
+
+  // Poster-mode characters (Echo, Prompt) have a transparent cut-out that
+  // sits directly on the field, matching the site -- no bone mount. Plate-
+  // mode characters keep the bone mount around their duotone plate, which is
+  // what makes the crop read as a deliberate specimen rather than a stray
+  // rectangle (see MOUNT_MARGIN note below).
+  const cutout = `src/assets/cutouts/${slug}.png`;
+  const hasCutout = existsSync(cutout);
+  const source = hasCutout ? cutout : `src/assets/duotone/${slug}.png`;
+
+  // fit: 'inside' with withoutEnlargement: false lets small source images
+  // upscale to fill the target box, matching CharacterBand's own treatment
+  // of the same crops -- see the NOTE above CARD_MAX_HEIGHT for why that's
+  // the right call here too.
+  const figureBuffer = await sharp(source)
     .resize({
       width: CARD_MAX_WIDTH,
       height: CARD_MAX_HEIGHT,
@@ -146,23 +167,31 @@ for (const slug of SLUGS) {
     })
     .png()
     .toBuffer();
-  const portraitMeta = await sharp(portraitBuffer).metadata();
+  const figureMeta = await sharp(figureBuffer).metadata();
 
-  // Bone mount panel: the portrait plus an even margin on all sides,
-  // matching the band's specimen-plate treatment (see MOUNT_MARGIN note).
-  const mountWidth = portraitMeta.width + MOUNT_MARGIN * 2;
-  const mountHeight = portraitMeta.height + MOUNT_MARGIN * 2;
-  const mountBuffer = await sharp({
-    create: {
-      width: mountWidth,
-      height: mountHeight,
-      channels: 3,
-      background: BACKGROUND,
-    },
-  })
-    .composite([{ input: portraitBuffer, left: MOUNT_MARGIN, top: MOUNT_MARGIN }])
-    .png()
-    .toBuffer();
+  // What gets centred on the field: the bare cut-out for poster mode, or the
+  // duotone plate wrapped in its bone mount for plate mode.
+  let mountBuffer = figureBuffer;
+  let mountWidth = figureMeta.width;
+  let mountHeight = figureMeta.height;
+
+  if (!hasCutout) {
+    // Bone mount panel: the plate plus an even margin on all sides,
+    // matching the band's specimen-plate treatment (see MOUNT_MARGIN note).
+    mountWidth = figureMeta.width + MOUNT_MARGIN * 2;
+    mountHeight = figureMeta.height + MOUNT_MARGIN * 2;
+    mountBuffer = await sharp({
+      create: {
+        width: mountWidth,
+        height: mountHeight,
+        channels: 3,
+        background: BACKGROUND,
+      },
+    })
+      .composite([{ input: figureBuffer, left: MOUNT_MARGIN, top: MOUNT_MARGIN }])
+      .png()
+      .toBuffer();
+  }
 
   const left = Math.round((CANVAS_WIDTH - mountWidth) / 2);
   const top = Math.round((CANVAS_HEIGHT - mountHeight) / 2);
@@ -172,7 +201,7 @@ for (const slug of SLUGS) {
       width: CANVAS_WIDTH,
       height: CANVAS_HEIGHT,
       channels: 3,
-      background: colourHex,
+      background: field,
     },
   })
     .composite([{ input: mountBuffer, left, top }])
@@ -180,6 +209,6 @@ for (const slug of SLUGS) {
     .toFile(`public/og/${slug}.png`);
 
   console.log(
-    `wrote public/og/${slug}.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), field ${colourHex}, portrait ${portraitMeta.width}x${portraitMeta.height}, mount ${mountWidth}x${mountHeight}`,
+    `wrote public/og/${slug}.png (${CANVAS_WIDTH}x${CANVAS_HEIGHT}), mode ${hasCutout ? 'poster' : 'plate'}, field ${field}, figure ${figureMeta.width}x${figureMeta.height}, mount ${mountWidth}x${mountHeight}`,
   );
 }

@@ -63,3 +63,14 @@ describe('character OG cards', () => {
     expect(existsSync(`dist/og/${slug}.png`)).toBe(true);
   });
 });
+
+describe('share cards follow art mode', () => {
+  it.each(['echo', 'prompt', 'gyro', 'valve', 'hikmah', 'ledger', 'roam', 'prism'])(
+    '%s card exists at 1200x630',
+    async (slug) => {
+      const sharp = (await import('sharp')).default;
+      const meta = await sharp(`dist/og/${slug}.png`).metadata();
+      expect([meta.width, meta.height]).toEqual([1200, 630]);
+    },
+  );
+});

@@ -6,3 +6,7 @@ dist/
 scripts/contact-sheet.png
 .playwright-mcp/
 at-*.png
+
+# Design docs stay local — they name private paths and record withheld canon.
+# Backed up outside the repo; never commit these to a public repository.
+docs/superpowers/

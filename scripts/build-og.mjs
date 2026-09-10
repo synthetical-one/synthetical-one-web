@@ -19,23 +19,40 @@ const CANVAS_HEIGHT = 630;
 const BACKGROUND = '#EDE9DD'; // --bone
 
 // NOTE on scale: the eight portraits are narrow full-body figures (aspect
-// ratios ~0.33-0.61, summing to ~3.67). Packed edge-to-edge in a single row
+// ratios ~0.40-0.71, summing to ~4.11). Packed edge-to-edge in a single row
 // with zero margins and zero gaps, the tallest achievable common height is
-// CANVAS_WIDTH / aspectSum =~ 326px (~52% of 630px) -- nowhere near the
+// CANVAS_WIDTH / aspectSum =~ 292px (~46% of 630px) -- nowhere near the
 // 70-75% (440-470px) that would look right for a single portrait alone.
 // Eight-across is a hard width constraint, not a tuning knob: any margin or
 // gap we keep only lowers that ceiling further. SIDE_MARGIN/GAP below are
 // chosen as the smallest values that still read as deliberate framing
 // (rather than edge-to-edge clipping), maximizing height within that limit.
-const SIDE_MARGIN = 32;
-const GAP = 10;
+const SIDE_MARGIN = 24;
+const GAP = 8;
+
+// Which art each character contributes to the roster card. This MUST match
+// what the site itself renders (CharacterBand.astro): the six plate
+// characters show their duotone plate, and the two poster characters
+// (Echo, Prompt) show their transparent cut-out.
+//
+// The first version of this card was built from src/assets/characters/*.png
+// -- the raw, untreated reference crops, each still carrying its own
+// original background (grey studio, purple street, luminous garden). That is
+// precisely the mismatch the duotone pass exists to remove. Every share of a
+// *character* page unfurled in the new visual language while every share of
+// the homepage unfurled in the old one. Read the treated art instead, and
+// the eight read as one series on bone.
+function rosterSource(slug) {
+  const cutout = `src/assets/cutouts/${slug}.png`;
+  return existsSync(cutout) ? cutout : `src/assets/duotone/${slug}.png`;
+}
 
 // Read each portrait's natural size so we can solve for a common height that
 // makes the whole row (8 portraits + 7 gaps + 2 side margins) fit exactly
 // within the canvas width.
 const portraits = [];
 for (const slug of SLUGS) {
-  const path = `src/assets/characters/${slug}.png`;
+  const path = rosterSource(slug);
   const meta = await sharp(path).metadata();
   portraits.push({ slug, path, aspect: meta.width / meta.height });
 }
@@ -50,11 +67,35 @@ const targetHeight = Math.round(availableWidth / aspectSum);
 const resized = [];
 let rowWidth = 0;
 for (const p of portraits) {
-  const buffer = await sharp(p.path)
+  let buffer = await sharp(p.path)
     .resize({ height: targetHeight })
     .png()
     .toBuffer();
-  const meta = await sharp(buffer).metadata();
+  let meta = await sharp(buffer).metadata();
+
+  // The two cut-outs are transparent, and on the site they are never seen on
+  // bare bone -- Echo stands on teal, Prompt on yellow. Dropped straight onto
+  // the bone canvas they read as two holes between six solid colour blocks,
+  // which is the opposite of "the eight as one series". Back each cut-out
+  // with its own field colour so all eight contribute a colour block of the
+  // same weight. A flat rectangle rather than the band's diagonal: at 267px
+  // tall and ~190px wide in an eight-across row, a diagonal is noise.
+  if (meta.hasAlpha) {
+    const field = readFrontmatterHex(p.slug, 'fieldHex');
+    buffer = await sharp({
+      create: {
+        width: meta.width,
+        height: meta.height,
+        channels: 3,
+        background: field,
+      },
+    })
+      .composite([{ input: buffer, left: 0, top: 0 }])
+      .png()
+      .toBuffer();
+    meta = await sharp(buffer).metadata();
+  }
+
   resized.push({ ...p, buffer, width: meta.width, height: meta.height });
   rowWidth += meta.width;
 }

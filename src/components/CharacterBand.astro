@@ -15,6 +15,11 @@ const onField = bestOn(d.fieldHex);
 const displayOnField = displayOn(d.fieldHex);
 const Heading = headingLevel;
 const isPoster = d.artMode === 'poster';
+// `headingLevel === 'h1'` is only ever passed by the character's own page,
+// where this band *is* the masthead — so its portrait is that page's LCP
+// element and must not be lazy. On the landing page the same component
+// renders as one of eight `h2` bands below the fold, where lazy is correct.
+// Don't "simplify" this into an unconditional loading value.
 const isPageHero = headingLevel === 'h1';
 ---
 <section
@@ -25,7 +30,16 @@ const isPageHero = headingLevel === 'h1';
   {isPoster && d.cutout ? (
     <div class="poster">
       <Heading class="poster-name">{d.name}</Heading>
-      <Image class="cutout" src={d.cutout} alt={`${d.name}, the ${d.archetype} — character portrait`} height={720} loading={isPageHero ? 'eager' : 'lazy'} />
+      {/*
+        The cut-outs are the only art with real resolution to spare: echo.png
+        is 688×1472 and prompt.png 988×1401, against a CSS box that tops out
+        at 700px tall. 700 + densities [1, 2] emits a 1400px-tall candidate
+        that both sources cover, so 2× displays get a sharp figure instead of
+        an upscale. (720 would have asked prompt.png for 1440px it hasn't
+        got.) The six duotone plates are 356–411px tall at source and stay at
+        height={340} with no density claim — see below.
+      */}
+      <Image class="cutout" src={d.cutout} alt={`${d.name}, the ${d.archetype} — character portrait`} height={700} densities={[1, 2]} loading={isPageHero ? 'eager' : 'lazy'} />
       <div class="rail">
         <PosterFurniture catalogue={d.catalogue} />
         <ul class="micro">
@@ -40,6 +54,12 @@ const isPageHero = headingLevel === 'h1';
   ) : (
     <div class="plate">
       <div class="mount">
+        {/*
+          No `densities` here, deliberately: the duotone plates are 356–411px
+          tall at source, so a 2× candidate for a 340px box would be pure
+          upscale — a bigger file that is not a sharper image. They are
+          source-limited, not markup-limited.
+        */}
         <Image src={d.duotone ?? d.portrait} alt={`${d.name}, the ${d.archetype} — character reference portrait`} height={340} loading={isPageHero ? 'eager' : 'lazy'} />
         <p class="cap">{d.catalogue} · REFERENCE · v1.0</p>
       </div>
@@ -69,17 +89,52 @@ const isPageHero = headingLevel === 'h1';
 
   /* Poster mode: the diagonal splits a saturated field from a bone region.
      Small text lives only in the bone region — bone on Prompt's yellow is
-     1.45:1, so the split is a contrast device, not an ornament.
+     1.45:1 and 12px mono ink on Echo's teal is 4.25:1, so the split is a
+     contrast device, not an ornament.
      Mode-specific rules key off [data-mode] rather than the band--poster /
      band--plate classes, so the class names stay free for markup/tests to
-     assert on without inflating a literal-string count with CSS selectors. */
+     assert on without inflating a literal-string count with CSS selectors.
+
+     DESKTOP GEOMETRY — the two-column layout below, and therefore this
+     diagonal, is what renders at *every viewport wider than 720px*: phone
+     landscape (736×414), small tablets, laptops and up alike. Below 720px
+     the column collapses and a horizontal cut replaces this rule (see the
+     media query further down). Name the range whenever you touch this: an
+     earlier version stated the invariant as "the rail starts around 74%,
+     the diagonal tops out at 72%" without saying at which widths that held,
+     and it only held above ~1200px. Between 721px and ~900px the rail is
+     pinned to its 220px minimum, so it starts far to the *left* of 72%, and
+     the field ran straight under the catalogue mark and the first micro-copy
+     words — measured at −27px on a 736×414 viewport.
+
+     The fix is to stop asserting a relationship and derive one. The
+     diagonal's top edge is placed `--rail-clear` to the left of wherever the
+     rail column actually starts:
+
+         rail column width  = max(--rail-min, --rail-frac × content width)
+         rail column left   = 100% − gutter − that width
+         diagonal top       = rail column left − --rail-clear
+
+     Because the diagonal only ever moves further left as it descends, top-
+     edge clearance is worst-case clearance: nothing in the rail, at any
+     height, on any viewport, can sit on the field. That holds without
+     knowing the band's height, which is what the previous fix (pinned to
+     the 720px column collapse) was missing — the failure was a function of
+     the rail's width against the band's height, not of the breakpoint.
+
+     The foot stays at --diagonal-foot (50%) rather than tracking the top,
+     because the field has a second job down there: containing .poster-name,
+     whose right edge lands at ~50% of the viewport across the whole 18vw
+     range. Echo's name is bone on teal, so any part of it that crossed onto
+     the bone side would simply vanish. */
   .band[data-mode='poster']::before {
     content: ''; position: absolute; inset: 0; background: var(--field);
-    clip-path: polygon(0 0, var(--diagonal) 0, calc(var(--diagonal) - 22%) 100%, 0 100%);
+    clip-path: polygon(0 0, var(--diagonal) 0, var(--diagonal-foot) 100%, 0 100%);
   }
   .poster {
     position: relative; display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 26%);
+    /* Same two tokens the diagonal is derived from — do not inline them. */
+    grid-template-columns: minmax(0, 1fr) minmax(var(--rail-min), calc(var(--rail-frac) * 100%));
     gap: clamp(20px, 4vw, 48px); align-items: end;
     padding: clamp(28px, 5vw, 72px) var(--gutter) 0;
     min-height: min(88vh, 760px);
@@ -106,12 +161,13 @@ const isPageHero = headingLevel === 'h1';
     font-size: clamp(24px, 2.5vw, 30px); line-height: 1.15; margin: 20px 0 0;
   }
   /* Poster's core question lives in .rail, which the diagonal never reaches
-     (--diagonal recedes from 72% at the top to 50% at the bottom, while
-     .rail's column starts around 74%) — it sits on bone always, so it keeps
-     a fixed ink colour rather than displayOn(fieldHex). Using the field-
-     derived colour here would put bone-on-bone invisible text behind Echo's
-     teal field. Plate's question sits directly on the field, so it takes
-     displayOn like the name does. */
+     at any viewport width — the diagonal's top edge is derived to sit
+     --rail-clear to the left of the rail column, and only moves further left
+     going down (see the DESKTOP GEOMETRY note above). It sits on bone
+     always, so it keeps a fixed ink colour rather than displayOn(fieldHex).
+     Using the field-derived colour here would put bone-on-bone invisible
+     text behind Echo's teal field. Plate's question sits directly on the
+     field, so it takes displayOn like the name does. */
   .band[data-mode='poster'] .q { color: var(--ink); }
   .band[data-mode='plate'] .q { color: var(--display-on-field); }
 
@@ -132,12 +188,12 @@ const isPageHero = headingLevel === 'h1';
     .plate, .poster { grid-template-columns: 1fr; }
 
     /* Below the column collapse, .rail becomes full-width and stacks under
-       the figure — the desktop vertical diagonal (a fixed % of *width*) no
-       longer has anything to do with where the rail sits, so it was putting
-       the catalogue mark, furniture and the first micro-copy words directly
-       on the saturated field. Swap it for a horizontal cut: field on top
-       (name + cutout), bone beneath (the whole rail). This is how the print
-       poster reflows anyway — not a compromise on the diagonal identity. */
+       the figure — there is no rail *column* left for the desktop diagonal
+       to be derived from, so a vertical split has nothing to protect and
+       would simply run under the catalogue mark, furniture and micro-copy.
+       Swap it for a horizontal cut: field on top (name + cutout), bone
+       beneath (the whole rail). This is how the print poster reflows anyway
+       — not a compromise on the diagonal identity. */
     .band[data-mode='poster']::before {
       clip-path: polygon(0 0, 100% 0, 100% 46%, 0 52%);
     }

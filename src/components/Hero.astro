@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import BrandLockup from './BrandLockup.astro';
+import PosterFurniture from './PosterFurniture.astro';
 import { YOUTUBE_URL, TAGLINE } from '../lib/site';
 import echoCutout from '../assets/cutouts/echo.png';
 ---
@@ -15,29 +16,86 @@ import echoCutout from '../assets/cutouts/echo.png';
       <a class="secondary" href="#the-eight">Meet the eight ↓</a>
     </div>
   </div>
-  <Image class="hero-figure" src={echoCutout} alt="" height={620} loading="eager" aria-hidden="true" />
+  {/*
+    Decorative on purpose. This is Echo's cut-out, but Echo is announced
+    properly by his own band further down the page; repeating him here would
+    put the same character in the accessibility tree twice under two
+    different descriptions.
+
+    2× density from the same 688×1472 source the bands use — see the note in
+    CharacterBand.astro. 620 × 2 = 1240, comfortably inside the source.
+  */}
+  <Image
+    class="hero-figure"
+    src={echoCutout}
+    alt=""
+    height={620}
+    densities={[1, 2]}
+    loading="eager"
+    aria-hidden="true"
+  />
+  <div class="hero-rail">
+    <PosterFurniture catalogue="N°000 — STUDIO" />
+    <ul class="micro">
+      <li>Eight characters</li>
+      <li>One world</li>
+      <li>Eight questions</li>
+    </ul>
+  </div>
 </header>
 
 <style>
+  /* The hero is a poster, built from the same devices as the eight bands:
+     a hard diagonal, an oversized headline, a figure standing over the
+     boundary, and a mono rail carrying the catalogue mark.
+
+     One deliberate difference: it has no *colour* field. Every saturated
+     field on this site belongs to a character, and the figure standing here
+     is Echo's cut-out — a teal field would read as "this is Echo's band",
+     which is wrong twice over (the hero belongs to the studio, and Echo's
+     real band is further down). So the split is tonal: --bone against
+     --bone-sunk. Ink on bone-sunk is 13.02:1 and --ink-soft on it is 4.67:1,
+     so unlike a character band there is no contrast constraint on either
+     side of this diagonal — the rail is here for the system's sake, not to
+     manufacture a safe region for small text.
+
+     The diagonal itself comes from the shared --diagonal derivation in
+     tokens.css, and the rail column from the same --rail-min / --rail-frac,
+     so the hero's boundary lands at exactly the same place as every band's.
+     See the DESKTOP GEOMETRY note in CharacterBand.astro. */
   .hero {
     position: relative; display: grid; align-items: end;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 42%);
-    gap: clamp(20px, 4vw, 56px);
+    /* copy | figure | rail. The figure column mirrors the rail's width so
+       the boundary falls just to its right, which is what puts the cut-out
+       astride the diagonal as it recedes. */
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, calc(var(--rail-frac) * 100%))
+      minmax(var(--rail-min), calc(var(--rail-frac) * 100%));
+    gap: clamp(20px, 4vw, 48px);
     padding: clamp(40px, 7vw, 96px) var(--gutter) 0;
+    min-height: min(82vh, 720px);
     overflow: hidden;
   }
-  @media (max-width: 860px) {
-    .hero { grid-template-columns: 1fr; }
-    .hero-figure { display: none; }
+  .hero::before {
+    content: ''; position: absolute; inset: 0; background: var(--bone-sunk);
+    clip-path: polygon(0 0, var(--diagonal) 0, var(--diagonal-foot) 100%, 0 100%);
   }
-  .hero-copy { padding-bottom: clamp(40px, 6vw, 88px); }
+  .hero-copy { position: relative; z-index: 2; padding-bottom: clamp(40px, 6vw, 88px); }
   .kicker {
     font-family: var(--font-mono); font-size: 12px; letter-spacing: .24em;
     text-transform: uppercase; color: var(--ink-soft); margin: 26px 0 22px;
   }
   h1 {
     font-family: var(--font-display); font-weight: 700; margin: 0;
-    font-size: clamp(48px, 10vw, 128px); line-height: .86;
+    /* The headline now shares its row with a figure column and a rail, so it
+       wraps inside a narrower column than it used to and cannot simply track
+       10vw. The offset slope (7.6vw − 12px) keeps display scale where there
+       is room — 97px at 1440, 118px on a wide desktop — while pulling back
+       fast enough that the longest word ("QUESTIONS.") still clears the
+       cut-out's column at ~880px, the narrowest width this layout renders
+       at. Checked at 880 / 1024 / 1440. */
+    font-size: clamp(48px, calc(7.6vw - 12px), 118px); line-height: .86;
     letter-spacing: -.04em; text-transform: uppercase;
   }
   .lede { max-width: var(--measure); margin: 26px 0 0; font-size: 18px; line-height: 1.55; color: var(--ink-soft); }
@@ -49,5 +107,33 @@ import echoCutout from '../assets/cutouts/echo.png';
   .secondary {
     color: var(--ink); font-family: var(--font-mono); font-size: 13px; letter-spacing: .14em;
   }
-  .hero-figure { align-self: end; max-height: 62vh; width: auto; height: auto; justify-self: center; }
+  .hero-figure {
+    position: relative; z-index: 1;
+    align-self: end; justify-self: center;
+    max-height: min(66vh, 620px); max-width: 100%; width: auto; height: auto;
+  }
+  .hero-rail {
+    position: relative; z-index: 2; color: var(--ink);
+    padding-bottom: clamp(24px, 4vw, 56px);
+  }
+  .micro { list-style: none; margin: 22px 0 0; padding: 0; }
+  .micro li {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: .22em;
+    text-transform: uppercase; line-height: 2;
+  }
+
+  @media (max-width: 860px) {
+    /* Same reflow as the bands below 720px: with one column there is no rail
+       *column* for a vertical split to protect, so the diagonal becomes a
+       horizontal cut — sunk above, bone below — and the rail stacks last. */
+    .hero {
+      grid-template-columns: 1fr;
+      min-height: 0;
+      padding-bottom: clamp(28px, 6vw, 48px);
+    }
+    .hero::before { clip-path: polygon(0 0, 100% 0, 100% 56%, 0 64%); }
+    .hero-figure { display: none; }
+    .hero-copy { padding-bottom: clamp(24px, 5vw, 40px); }
+    h1 { font-size: clamp(44px, 11vw, 88px); }
+  }
 </style>

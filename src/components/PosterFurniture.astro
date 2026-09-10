@@ -16,7 +16,10 @@ const { catalogue } = Astro.props;
 </div>
 
 <style>
-  .furniture-block { display: flex; align-items: center; gap: 14px; opacity: .8; }
+  /* Wraps because the mark is not always a bare catalogue number — the hero
+     passes a studio-level mark ("N°000 — STUDIO"), which is wider than the
+     rail's 220px minimum once the two glyphs are alongside it. */
+  .furniture-block { display: flex; align-items: center; gap: 14px; opacity: .8; flex-wrap: wrap; }
   .mark { font-family: var(--font-mono); font-size: 12px; letter-spacing: .22em; }
   .furniture { display: block; }
 </style>

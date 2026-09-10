@@ -12,7 +12,28 @@
   --measure: 60ch;
   --gutter: clamp(20px, 4vw, 48px);
   --grain-opacity: 0.055;
-  --diagonal: 72%;
+
+  /* Poster geometry (see CharacterBand.astro for the full argument).
+     `--rail-min` / `--rail-frac` size the bone rail — the right-hand grid
+     column that carries all of a poster's small text — and are also what the
+     diagonal is derived from, so the boundary and the column it protects can
+     never drift apart.
+
+     `--rail-col` and `--diagonal` contain a bare `100%`, which resolves
+     against whichever box finally uses them. They are only meaningful inside
+     an element that spans the full band/hero width (in practice: an
+     `inset: 0` pseudo-element on the section itself). */
+  --rail-min: 220px;
+  --rail-frac: .26;
+  /* Gap between the diagonal's top edge and the rail column's left edge.
+     Lands inside the grid column gap, which is clamp(20px, 4vw, 48px). */
+  --rail-clear: clamp(16px, 2vw, 40px);
+  --rail-col: max(var(--rail-min), calc(var(--rail-frac) * (100% - 2 * var(--gutter))));
+  --diagonal: calc(100% - var(--gutter) - var(--rail-col) - var(--rail-clear));
+  /* Where the diagonal lands at the foot of the band. Not derived: the field
+     also has to contain the display name at its full 18vw, whose right edge
+     sits at ~50% of the viewport for a four-letter name. */
+  --diagonal-foot: 50%;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

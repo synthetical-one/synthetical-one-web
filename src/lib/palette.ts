@@ -59,3 +59,14 @@ export function bestOn(field: string): string {
     ? GROUND.bone
     : GROUND.ink;
 }
+
+/**
+ * Display-type colour for a saturated field. Prefers bone, which is what the
+ * reference posters use, falling back to ink only where bone cannot clear the
+ * 3:1 large-text threshold — currently just Prompt's yellow at 1.45:1.
+ * Distinct from bestOn(), which maximises contrast and is right for focus
+ * rings but flips the name colour around the roster.
+ */
+export function displayOn(field: string): string {
+  return contrastRatio(GROUND.bone, field) >= 3 ? GROUND.bone : GROUND.ink;
+}

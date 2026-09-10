@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { GROUND, CHARACTER_COLOURS, FIELD_COLOURS, contrastRatio, bestOn } from '../src/lib/palette';
+import {
+  GROUND,
+  CHARACTER_COLOURS,
+  FIELD_COLOURS,
+  contrastRatio,
+  bestOn,
+  displayOn,
+} from '../src/lib/palette';
 
 describe('contrastRatio', () => {
   it('is 21:1 for black on white', () => {
@@ -79,4 +86,36 @@ describe('poster field colours', () => {
   it('bone is unusable on the yellow field, so small text must not go there', () => {
     expect(contrastRatio(GROUND.bone, '#F3BB19')).toBeLessThan(3);
   });
+});
+
+describe('displayOn', () => {
+  // The eight fields a character's display type (name, core question) can
+  // land on: each character's poster field where one exists, else their
+  // canon colour. Prompt's yellow is the sole case where bone fails 3:1.
+  const ALL_FIELDS: Record<string, string> = {
+    ...CHARACTER_COLOURS,
+    ...FIELD_COLOURS,
+  };
+
+  it.each(Object.entries(ALL_FIELDS))(
+    '%s: prefers bone, falling back to ink only where bone fails 3:1',
+    (slug, hex) => {
+      if (hex === '#F3BB19') {
+        expect(displayOn(hex)).toBe(GROUND.ink);
+      } else {
+        expect(displayOn(hex)).toBe(GROUND.bone);
+      }
+    },
+  );
+
+  it("returns ink for Prompt's yellow", () => {
+    expect(displayOn('#F3BB19')).toBe(GROUND.ink);
+  });
+
+  it.each(Object.entries(ALL_FIELDS))(
+    '%s: the returned colour clears 3:1 against the field',
+    (_slug, hex) => {
+      expect(contrastRatio(displayOn(hex), hex)).toBeGreaterThanOrEqual(3);
+    },
+  );
 });

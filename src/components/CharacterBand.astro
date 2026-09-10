@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
-import { bestOn, GROUND } from '../lib/palette';
+import { bestOn, displayOn, GROUND } from '../lib/palette';
 import PosterFurniture from './PosterFurniture.astro';
 
 interface Props {
@@ -12,13 +12,14 @@ interface Props {
 const { entry, headingLevel = 'h2', showProfileLink = true } = Astro.props;
 const d = entry.data;
 const onField = bestOn(d.fieldHex);
+const displayOnField = displayOn(d.fieldHex);
 const Heading = headingLevel;
 const isPoster = d.artMode === 'poster';
 ---
 <section
   class={`band band--${d.artMode}`}
   data-mode={d.artMode}
-  style={`--field:${d.fieldHex}; --on-field:${onField}; --mount:${GROUND.bone}; --focus-ring:${onField}`}
+  style={`--field:${d.fieldHex}; --on-field:${onField}; --display-on-field:${displayOnField}; --mount:${GROUND.bone}; --focus-ring:${onField}`}
 >
   {isPoster && d.cutout ? (
     <div class="poster">
@@ -49,6 +50,7 @@ const isPoster = d.artMode === 'poster';
           <div><dt>AESTHETIC</dt><dd>{d.aesthetic}</dd></div>
           <div><dt>COLOUR</dt><dd>{d.colourName}</dd></div>
           <div><dt>HOME</dt><dd>{d.home}</dd></div>
+          <div><dt>ROLE</dt><dd>{d.role}</dd></div>
           {d.companion && <div><dt>COMPANION</dt><dd>{d.companion}</dd></div>}
           {d.accessory && <div><dt>ACCESSORY</dt><dd>{d.accessory}</dd></div>}
           {d.scale && <div><dt>SCALE</dt><dd>{d.scale}</dd></div>}
@@ -85,7 +87,7 @@ const isPoster = d.artMode === 'poster';
     position: absolute; left: var(--gutter); bottom: 0; margin: 0; z-index: 0;
     font-family: var(--font-display); font-weight: 700;
     font-size: clamp(80px, 18vw, 320px); line-height: .78; letter-spacing: -.05em;
-    text-transform: uppercase; color: var(--on-field); opacity: .92;
+    text-transform: uppercase; color: var(--display-on-field); opacity: .92;
   }
   .poster :global(.cutout) {
     position: relative; z-index: 1; justify-self: center; align-self: end;
@@ -102,8 +104,15 @@ const isPoster = d.artMode === 'poster';
     font-family: var(--font-display); font-weight: 500;
     font-size: clamp(24px, 2.5vw, 30px); line-height: 1.15; margin: 20px 0 0;
   }
+  /* Poster's core question lives in .rail, which the diagonal never reaches
+     (--diagonal recedes from 72% at the top to 50% at the bottom, while
+     .rail's column starts around 74%) — it sits on bone always, so it keeps
+     a fixed ink colour rather than displayOn(fieldHex). Using the field-
+     derived colour here would put bone-on-bone invisible text behind Echo's
+     teal field. Plate's question sits directly on the field, so it takes
+     displayOn like the name does. */
   .band[data-mode='poster'] .q { color: var(--ink); }
-  .band[data-mode='plate'] .q { color: var(--on-field); }
+  .band[data-mode='plate'] .q { color: var(--display-on-field); }
 
   .chip {
     display: inline-block; background: var(--mount); color: var(--ink);
@@ -128,6 +137,7 @@ const isPoster = d.artMode === 'poster';
   .name {
     font-family: var(--font-display); font-weight: 700; margin: 0;
     font-size: clamp(52px, 9vw, 116px); line-height: .82; letter-spacing: -.035em; text-transform: uppercase;
+    color: var(--display-on-field);
   }
   .spec {
     margin: 26px 0 0; background: var(--mount); color: var(--ink); padding: 16px 18px;

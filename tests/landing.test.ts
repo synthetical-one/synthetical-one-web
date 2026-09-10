@@ -30,3 +30,19 @@ describe('landing page', () => {
     expect(html().match(/<h1[\s>]/g)).toHaveLength(1);
   });
 });
+
+describe('hero poster', () => {
+  const html = () => readFileSync('dist/index.html', 'utf8');
+
+  it('still has exactly one h1', () => {
+    expect(html().match(/<h1[\s>]/g)).toHaveLength(1);
+  });
+
+  it('carries a secondary route to the roster', () => {
+    expect(html()).toContain('href="#the-eight"');
+  });
+
+  it('the roster section has that anchor', () => {
+    expect(html()).toContain('id="the-eight"');
+  });
+});

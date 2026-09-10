@@ -16,7 +16,9 @@ const characters = (await getCollection('characters')).sort(
 <Base title="Synthetical — an AI-native media studio" description={TAGLINE}>
   <Hero />
   <Premise />
-  {characters.map((entry) => <CharacterBand entry={entry} />)}
+  <section id="the-eight">
+    {characters.map((entry) => <CharacterBand entry={entry} />)}
+  </section>
   <WhatWeMake />
   <Studio />
   <SiteFooter />

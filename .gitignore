@@ -4,3 +4,5 @@ dist/
 .DS_Store
 .superpowers/
 scripts/contact-sheet.png
+.playwright-mcp/
+at-*.png

@@ -1,0 +1,21 @@
+---
+// Paper grain overlay. The noise is painted directly as a background image —
+// a self-contained SVG data URI carrying feTurbulence plus a <rect> for it to
+// paint onto — rather than applied as filter: url(#id) to an empty element.
+// A filter has no source pixels to operate on when its target paints
+// nothing, so that approach renders invisible; this one always has content.
+---
+<div class="grain" aria-hidden="true"></div>
+
+<style>
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 220px 220px;
+  }
+</style>

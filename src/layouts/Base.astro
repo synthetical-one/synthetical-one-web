@@ -1,6 +1,8 @@
 ---
 import '../styles/fonts.css';
 import '../styles/tokens.css';
+import '../styles/motion.css';
+import Grain from '../components/Grain.astro';
 import { SITE_NAME, SITE_URL } from '../lib/site';
 
 interface Props { title: string; description: string; ogImage?: string }
@@ -26,6 +28,7 @@ const image = new URL(ogImage ?? '/og-default.png', SITE_URL).href;
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
+    <Grain />
     <a class="skip" href="#main">Skip to content</a>
     <main id="main" tabindex="-1"><slot /></main>
     <style>

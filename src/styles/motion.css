@@ -1,0 +1,48 @@
+/* Scroll-driven motion. Additive only: Firefox has no animation-timeline
+   support and receives the static composition, which must be fully legible
+   on its own. The depth effect is named "drift" deliberately: the obvious
+   alternative name is a former company name, banned as an identifier, and
+   is deliberately not written here because this comment may survive
+   minification into the built CSS that the brand guard scans.
+
+   The poster field (.band--poster::before) already carries a clip-path,
+   and it is a different shape at the mobile breakpoint (a horizontal cut
+   instead of the desktop diagonal — see CharacterBand.astro). Animating
+   clip-path here would mean maintaining two competing keyframe shapes and
+   would still fight the responsive swap, since a running animation's
+   computed value overrides whichever static clip-path the media query set.
+   Opacity has no such conflict: it composes with clip-path regardless of
+   which shape is active, so the field can fade in as it enters the
+   viewport at any breakpoint without touching the clip. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    @keyframes field-drift {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes name-drift {
+      from { transform: translateY(6%); }
+      to   { transform: translateY(-6%); }
+    }
+    @keyframes micro-rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .band--poster::before {
+      animation: field-drift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .poster-name {
+      animation: name-drift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+    .micro li {
+      animation: micro-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 60%;
+    }
+  }
+}

@@ -15,6 +15,7 @@ const onField = bestOn(d.fieldHex);
 const displayOnField = displayOn(d.fieldHex);
 const Heading = headingLevel;
 const isPoster = d.artMode === 'poster';
+const isPageHero = headingLevel === 'h1';
 ---
 <section
   class={`band band--${d.artMode}`}
@@ -24,7 +25,7 @@ const isPoster = d.artMode === 'poster';
   {isPoster && d.cutout ? (
     <div class="poster">
       <Heading class="poster-name">{d.name}</Heading>
-      <Image class="cutout" src={d.cutout} alt={`${d.name}, the ${d.archetype} — character portrait`} height={720} />
+      <Image class="cutout" src={d.cutout} alt={`${d.name}, the ${d.archetype} — character portrait`} height={720} loading={isPageHero ? 'eager' : 'lazy'} />
       <div class="rail">
         <PosterFurniture catalogue={d.catalogue} />
         <ul class="micro">
@@ -39,7 +40,7 @@ const isPoster = d.artMode === 'poster';
   ) : (
     <div class="plate">
       <div class="mount">
-        <Image src={d.duotone ?? d.portrait} alt={`${d.name}, the ${d.archetype} — character reference portrait`} height={340} />
+        <Image src={d.duotone ?? d.portrait} alt={`${d.name}, the ${d.archetype} — character reference portrait`} height={340} loading={isPageHero ? 'eager' : 'lazy'} />
         <p class="cap">{d.catalogue} · REFERENCE · v1.0</p>
       </div>
       <div class="copy">

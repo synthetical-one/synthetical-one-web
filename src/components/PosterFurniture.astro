@@ -1,0 +1,22 @@
+---
+interface Props { catalogue: string }
+const { catalogue } = Astro.props;
+---
+<div class="furniture-block" aria-hidden="true">
+  <span class="mark">{catalogue}</span>
+  <svg class="furniture" viewBox="0 0 40 40" width="28" height="28" aria-hidden="true">
+    <circle cx="20" cy="20" r="9" fill="none" stroke="currentColor" stroke-width="1.5" />
+    <path d="M20 2v10M20 28v10M2 20h10M28 20h10" stroke="currentColor" stroke-width="1.5" />
+  </svg>
+  <svg class="furniture" viewBox="0 0 40 24" width="40" height="24" aria-hidden="true">
+    {[0, 8, 16, 24, 32].map((x) => (
+      <path d={`M${x} 24 L${x + 10} 0`} stroke="currentColor" stroke-width="4" />
+    ))}
+  </svg>
+</div>
+
+<style>
+  .furniture-block { display: flex; align-items: center; gap: 14px; opacity: .8; }
+  .mark { font-family: var(--font-mono); font-size: 12px; letter-spacing: .22em; }
+  .furniture { display: block; }
+</style>

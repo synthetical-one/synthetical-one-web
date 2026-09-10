@@ -52,3 +52,29 @@ describe('character bands on the landing page', () => {
     }
   });
 });
+
+describe('poster mode', () => {
+  const html = () => decodeEntities(readFileSync('dist/index.html', 'utf8'));
+
+  it('renders a diagonal field for poster-mode characters', () => {
+    expect(html()).toMatch(/class="[^"]*band--poster/);
+  });
+
+  it('renders micro-copy words for echo', () => {
+    const page = html();
+    for (const word of ['LISTEN', 'THINK', 'EXPLORE', 'DISCUSS', 'REPEAT']) {
+      expect(page).toContain(word);
+    }
+  });
+
+  it('plate-mode characters do not get poster class', () => {
+    const plates = (html().match(/band--plate/g) ?? []).length;
+    expect(plates).toBe(6);
+  });
+
+  it('decorative furniture is hidden from assistive tech', () => {
+    const furniture = html().match(/<svg[^>]*class="[^"]*furniture[^"]*"[^>]*>/g) ?? [];
+    expect(furniture.length).toBeGreaterThan(0);
+    for (const el of furniture) expect(el).toContain('aria-hidden="true"');
+  });
+});

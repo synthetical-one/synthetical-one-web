@@ -14,3 +14,10 @@ docs/superpowers/
 # Cut-out import sources: absolute paths into a private media library outside
 # this repo. Same reason as above — this repository is public.
 scripts/cutout-sources.local.json
+
+# Reference sheet sources: absolute paths into a private media library outside
+# this repo. Character crops (src/assets/characters/*.png) are derived from
+# these; the crops stay committed (along with the crop boxes), but the source
+# sheets are private canon material deliberately withheld from public publication.
+scripts/crop-sources.local.json
+src/assets/reference-sheets/
